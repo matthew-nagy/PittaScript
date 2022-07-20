@@ -116,6 +116,20 @@ case OpType:\
 		return expression->accept(this);
 	}
 
+	void Interpreter::visitExpressionStmt(Expression<void, Value>* stmt) {
+		evaluate(stmt->expression);
+	}
+
+	void Interpreter::visitPrintStmt(Print<void, Value>* stmt) {
+		Value val = evaluate(stmt->expression);
+		printf("%s\n", val.toString());
+	}
+
+
+	void Interpreter::execute(Stmt<void, Value>* stmt) {
+		stmt->accept(this);
+	}
+
 
 	void Interpreter::interpret(Expr<Value>* expression) {
 		try {
@@ -123,6 +137,16 @@ case OpType:\
 		}
 		catch (...) {
 			printf("Some heccin error occoured\n");
+		}
+	}
+
+	void Interpreter::interpret(const std::vector<Stmt<void, Value>*>& statements) {
+		try {
+			for (Stmt<void, Value>* statement : statements)
+				execute(statement);
+		}
+		catch (PittaRuntimeException* exception) {
+			runtime->runtimeError(exception);
 		}
 	}
 

@@ -24,6 +24,10 @@ namespace pitta {
 			}
 		}
 
+		void runtimeError(PittaRuntimeException* exception) {
+			report(exception);
+		}
+
 		std::vector<Token> scan(const std::string& source) {
 			Scanner scanner(source, this);
 			return scanner.scanTokens();
@@ -32,6 +36,11 @@ namespace pitta {
 	private:
 		void report(int line, const std::string& where, const std::string& message) {
 			printf("[line %d] Error%s: %s\n", line, where.c_str(), message.c_str());
+			hadError = true;
+		}
+
+		void report(PittaRuntimeException* exception) {
+			printf("Runtime error: %s\n", exception->what());
 			hadError = true;
 		}
 	};

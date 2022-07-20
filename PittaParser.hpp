@@ -1,6 +1,6 @@
 #pragma once
 #include <initializer_list>
-#include "PittaExpressions.hpp"
+#include "PittaStatements.hpp"
 
 namespace pitta {
 
@@ -8,14 +8,13 @@ namespace pitta {
 	class Parser {
 	public:
 
-		template<class T>
-		Expr<T>* parse() {
-			try {
-				return expression<T>();
-			}
-			catch (PittaRuntimeException* exception) {
-				return nullptr;
-			}
+		template<class T, class R>
+		std::vector<Stmt<T, R>*> parse() {
+			std::vector<Stmt<T, R>*> statements;
+			while (!isAtEnd())
+				statements.emplace_back(statement<T, R>());
+
+			return statements;
 		}
 
 		Parser(const std::vector<Token>& tokens, Runtime* runtime) :
@@ -193,6 +192,35 @@ namespace pitta {
 
 			throw error(peek(), "Expect expression.");
 		}
+
+
+		template<class T,class R>
+		Stmt<T, R>* statement() {
+			if (match(PRINT))return printStatement<T, R>();
+
+			return expressionStatement<T, R>();
+		}
+
+		template<class T, class R>
+		Stmt<T, R>* printStatement() {
+			Expr<R>* expr = expression<R>();
+			consume(SEMICOLON, "Expect ';' after value");
+			return new Print<T, R>(expr);
+		}
+
+		template<class T, class R>
+		Stmt<T, R>* expressionStatement() {
+			Expr<R>* expr = expression<R>();
+			consume(SEMICOLON, "Expect ';' after expression");
+			return new Expression<T, R>(expr);
+		}
+
+		/*template<class T, class R>
+		Stmt<T, R>* statement() {
+
+		}*/
+		
+
 	};
 
 }
