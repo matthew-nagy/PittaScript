@@ -24,6 +24,8 @@ namespace pitta {
 
 		void visitExpressionStmt(Expression<void, Value>* stmt);
 
+		void visitIfStmt(If<void, Value>* stmt);
+
 		void visitPrintStmt(Print<void, Value>* stmt);
 
 		void visitVarStmt(Var<void, Value>* stmt);

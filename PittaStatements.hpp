@@ -5,6 +5,7 @@ namespace pitta {
 
     template<class T, class R>class Block;
     template<class T, class R>class Expression;
+    template<class T, class R> class If;
     template<class T, class R>class Print;
     template<class T, class R>class Var;
 
@@ -15,7 +16,7 @@ namespace pitta {
         //virtual T visitClassStmt(Class<T, R>* stmt) = 0;
         virtual T visitExpressionStmt(Expression<T, R>* stmt) = 0;
         //virtual T visitFunctionStmt(Function<T, R>* stmt) = 0;
-        //virtual T visitIfStmt(If<T, R>* stmt) = 0;
+        virtual T visitIfStmt(If<T, R>* stmt) = 0;
         virtual T visitPrintStmt(Print<T, R>* stmt) = 0;
         //virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
         virtual T visitVarStmt(Var<T, R>* stmt) = 0;
@@ -54,6 +55,25 @@ namespace pitta {
 
         Expression(Expr<R>* expression):
             expression(expression)
+        {}
+
+    };
+
+    template<class T, class R>
+    class If : public Stmt<T, R> {
+    public:
+        Expr<R>* condition;
+        Stmt<T, R>* thenBranch;
+        Stmt<T, R>* elseBranch;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitIfStmt(this);
+        }
+
+        If(Expr<R>* condition, Stmt<T, R>* thenBranch, Stmt<T, R>* elseBranch) :
+            condition(condition),
+            thenBranch(thenBranch),
+            elseBranch(elseBranch)
         {}
 
     };
@@ -108,7 +128,10 @@ namespace pitta {
             return getTabbedOut() + "<expr : " + stmt->expression->accept(&exprPrinter) + " >";
         }
         //std::string visitFunctionStmt(Function<std::string, std::string>* stmt) = 0;
-        //std::string visitIfStmt(If<std::string, std::string>* stmt) = 0;
+        std::string visitIfStmt(If<std::string, std::string>* stmt) {
+            return getTabbedOut() + "<if  " + stmt->condition->accept(&exprPrinter) + " : " + stmt->thenBranch->accept(this) +
+                (stmt->elseBranch != nullptr ? (" else :" + stmt->elseBranch->accept(this)) : "") + " >";
+        }
         std::string visitPrintStmt(Print<std::string, std::string>* stmt) {
             return getTabbedOut() + "<print : " + stmt->expression->accept(&exprPrinter) + " >";
         }

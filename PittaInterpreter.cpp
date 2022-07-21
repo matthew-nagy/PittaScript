@@ -141,6 +141,13 @@ case OpType:\
 		evaluate(stmt->expression);
 	}
 
+	void Interpreter::visitIfStmt(If<void, Value>* stmt) {
+		if (evaluate(stmt->condition).isTruthy())
+			execute(stmt->thenBranch);
+		else if (stmt->elseBranch != nullptr)
+			execute(stmt->elseBranch);
+	}
+
 	void Interpreter::visitPrintStmt(Print<void, Value>* stmt) {
 		Value val = evaluate(stmt->expression);
 		printf("%s\n", val.toString().c_str());

@@ -30,7 +30,8 @@ int main() {
 							}\
 							print a;\
 							print b;\
-							print c; ";
+							print c;\
+							if(false){print 5;}else if(false){print 3;}else print 1;";
 
 
 	pitta::Runtime runtime;

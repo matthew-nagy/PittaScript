@@ -230,6 +230,7 @@ namespace pitta {
 
 		template<class T,class R>
 		Stmt<T, R>* statement() {
+			if (match(IF)) return ifStatement<T, R>();
 			if (match(LEFT_BRACE))return new Block<T, R>(block<T, R>());
 			if (match(PRINT))return printStatement<T, R>();
 
@@ -252,6 +253,21 @@ namespace pitta {
 			Expr<R>* expr = expression<R>();
 			consume(SEMICOLON, "Expect ';' after expression");
 			return new Expression<T, R>(expr);
+		}
+
+		template<class T, class R>
+		Stmt<T, R>* ifStatement() {
+			consume(LEFT_PAREN, "Expect '(' after 'if'.");
+			Expr<R>* condition = expression<R>();
+			consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+			Stmt<T, R>* thenBranch = statement<T, R>();
+			Stmt<T, R>* elseBranch = nullptr;
+			if (match(ELSE)) {
+				elseBranch = statement<T, R>();
+			}
+
+			return new If<T, R>(condition, thenBranch, elseBranch);
 		}
 
 		template<class T, class R>
