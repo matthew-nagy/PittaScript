@@ -12,7 +12,7 @@ namespace pitta {
 		std::vector<Stmt<T, R>*> parse() {
 			std::vector<Stmt<T, R>*> statements;
 			while (!isAtEnd())
-				statements.emplace_back(statement<T, R>());
+				statements.emplace_back(declaration <T, R>());
 
 			return statements;
 		}
@@ -106,7 +106,26 @@ namespace pitta {
 
 		template<class T>
 		Expr<T>* expression() {
-			return equality<T>();
+			return assignment<T>();
+		}
+
+		template<class T>
+		Expr<T>* assignment() {
+			Expr<T>* expr = equality<T>();
+
+			if (match(EQUAL)) {
+				Token equals = previous();
+				Expr<T>* value = assignment<T>();
+
+				if (expr->getType() == typeid(Variable<T>)) {
+					Token name = ((Variable<T>*)expr)->name;
+					return new Assign<T>(name, value);
+				}
+
+				error(equals, "Invalid assignment target.");
+			}
+
+			return expr;
 		}
 
 		template<class T>
@@ -179,6 +198,7 @@ namespace pitta {
 			if (match(TRUE)) return new Literal<T>(value = true);
 			if (match(NIL)) return new Literal<T>(value = nullptr);
 			if (match(UNDEFINED)) return new Literal<T>(value = Undefined);
+			if (match(IDENTIFIER)) return new Variable<T>(previous());
 
 			if (match({ INT, FLOAT, STRING })) {
 				return new Literal<T>(value = previous().getLiteralValue());
@@ -194,11 +214,44 @@ namespace pitta {
 		}
 
 
+		template<class T, class R>
+		Stmt<T, R>* declaration() {
+			try {
+				if (match(VAR))
+					return varDeclaration<T, R>();
+
+				return statement<T, R>();
+			}
+			catch (PittaRuntimeException* error) {
+				synchronize();
+				return nullptr;
+			}
+		}
+
 		template<class T,class R>
 		Stmt<T, R>* statement() {
+			if (match(LEFT_BRACE))return new Block<T, R>(block<T, R>());
 			if (match(PRINT))return printStatement<T, R>();
 
 			return expressionStatement<T, R>();
+		}
+
+		template<class T, class R>
+		std::vector<Stmt<T, R>*> block() {
+			std::vector<Stmt<T, R>*> statements;
+
+			while (!check(RIGHT_BRACE) && !isAtEnd())
+				statements.emplace_back(declaration<T, R>());
+
+			consume(RIGHT_BRACE, "Expect '}' after block.");
+			return statements;
+		}
+
+		template<class T, class R>
+		Stmt<T, R>* expressionStatement() {
+			Expr<R>* expr = expression<R>();
+			consume(SEMICOLON, "Expect ';' after expression");
+			return new Expression<T, R>(expr);
 		}
 
 		template<class T, class R>
@@ -209,10 +262,16 @@ namespace pitta {
 		}
 
 		template<class T, class R>
-		Stmt<T, R>* expressionStatement() {
-			Expr<R>* expr = expression<R>();
-			consume(SEMICOLON, "Expect ';' after expression");
-			return new Expression<T, R>(expr);
+		Stmt<T, R>* varDeclaration() {
+			Token name = consume(IDENTIFIER, "Expect variable name.");
+
+			Expr<R>* initializer = nullptr;
+			if (match(EQUAL)) {
+				initializer = expression<R>();
+			}
+
+			consume(SEMICOLON, "Expect ';' after variable declaration");
+			return new Var<T, R>(name, initializer);
 		}
 
 		/*template<class T, class R>

@@ -3,6 +3,12 @@
 
 namespace pitta {
 
+	Value Interpreter::visitAssignExpr(Assign<Value>* expr) {
+		Value value = evaluate(expr->value);
+		environment->assign(expr->name, value);
+		return value;
+	}
+
 	Value Interpreter::visitBinaryExpr(Binary<Value>* expr) {
 		Value left = evaluate(expr->left);
 		Value right = evaluate(expr->right);
@@ -112,8 +118,23 @@ case OpType:\
 		return toReturn = Undefined;
 	}
 
+	Value Interpreter::visitVariableExpr(Variable<Value>* expr) {
+		return environment->get(expr->name);
+	}
+
 	Value Interpreter::evaluate(Expr<Value>* expression) {
 		return expression->accept(this);
+	}
+
+
+
+
+
+
+
+
+	void Interpreter::visitBlockStmt(Block<void, Value>* stmt) {
+		executeBlock(stmt->statements, std::make_shared<Environment>(environment));
 	}
 
 	void Interpreter::visitExpressionStmt(Expression<void, Value>* stmt) {
@@ -125,9 +146,47 @@ case OpType:\
 		printf("%s\n", val.toString().c_str());
 	}
 
+	void Interpreter::visitVarStmt(Var<void, Value>* stmt) {
+		Value value;
+		if (stmt->initializer != nullptr) {
+			value = evaluate(stmt->initializer);
+		}
+
+		environment->define(stmt->name.lexeme, value);
+	}
 
 	void Interpreter::execute(Stmt<void, Value>* stmt) {
 		stmt->accept(this);
+	}
+
+
+	class SetBack {
+	public:
+		SetBack(std::shared_ptr<Environment>& toSet, const std::shared_ptr<Environment>& value):
+			toSet(toSet),
+			value(value)
+		{}
+
+		~SetBack() {
+			toSet = value;
+		}
+	private:
+		std::shared_ptr<Environment>& toSet;
+		std::shared_ptr<Environment> value;
+	};
+
+	void Interpreter::executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv) {
+		std::shared_ptr<Environment> previous = environment;
+		environment = newEnv;
+		SetBack raiiTrySafe(environment, previous);
+
+		try {
+			for (Stmt<void, Value>* statement : statements)
+				execute(statement);
+		}
+		catch (std::runtime_error* error) {
+			throw(error);
+		}
 	}
 
 

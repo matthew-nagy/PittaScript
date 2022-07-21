@@ -1,5 +1,6 @@
 #pragma once
 #include "PittaTokenScanner.hpp"
+#include <typeindex>
 
 namespace pitta {
 
@@ -21,11 +22,11 @@ namespace pitta {
 	public:
 		virtual ~ExpressionVisitor() = default;
 		virtual T visitLiteralExpr(Literal<T>* expr) = 0;
-		//virtual T visitAssignExpr(Assign<T>* expr) = 0;
+		virtual T visitAssignExpr(Assign<T>* expr) = 0;
 		virtual T visitBinaryExpr(Binary<T>* expr) = 0;
 		virtual T visitGroupingExpr(Grouping<T>* expr) = 0;
 		virtual T visitUnaryExpr(Unary<T>* expr) = 0;
-		//virtual T visitVariableExpr(Variable<T>* expr) = 0;
+		virtual T visitVariableExpr(Variable<T>* expr) = 0;
 		//virtual T visitLogicalExpr(Logical<T>* expr) = 0;
 		//virtual T visitCallExpr(Call<T>* expr) = 0;
 		//virtual T visitGetExpr(Get<T>* expr) = 0;
@@ -39,6 +40,9 @@ namespace pitta {
 	class Expr {
 	public:
 		virtual T accept(ExpressionVisitor<T>* visitor) = 0;
+
+		virtual std::type_index getType()const = 0;
+
 	};
 
 #define SingleArgExp(Name, ArgQualifier, ArgName, visitType)\
@@ -49,6 +53,7 @@ public:\
 	T accept(ExpressionVisitor<T>* visitor)override {\
 		return visitor-> visitType (this);\
 	}\
+	std::type_index getType()const override{return typeid( Name );}\
 	Name ( ArgQualifier ArgName ):\
 		ArgName(ArgName)\
 	{}\
@@ -63,6 +68,7 @@ public:\
 	T accept(ExpressionVisitor<T>* visitor)override {\
 		return visitor-> visitType (this);\
 	}\
+	std::type_index getType()const override{return typeid( Name );}\
 	Name ( ArgQualifier1 ArgName1, ArgQualifier2 ArgName2 ):\
 		ArgName1(ArgName1),\
 		ArgName2(ArgName2)\
@@ -79,12 +85,15 @@ public:\
 	T accept(ExpressionVisitor<T>* visitor)override {\
 		return visitor-> visitType (this);\
 	}\
+	std::type_index getType()const override{return typeid( Name );}\
 	Name ( ArgQualifier1 ArgName1, ArgQualifier2 ArgName2, ArgQualifier3 ArgName3 ):\
 		ArgName1(ArgName1),\
 		ArgName2(ArgName2),\
 		ArgName3(ArgName3)\
 	{}\
 }\
+
+	DoubleArgExp(Assign, Token, name, Expr<T>*, value, visitAssignExpr);
 
 	TripleArgExp(Binary, Expr<T>*, left, Token, op, Expr<T>*, right, visitBinaryExpr);
 
@@ -94,11 +103,17 @@ public:\
 
 	DoubleArgExp(Unary, Token, op, Expr<T>*, right, visitUnaryExpr);
 
+	SingleArgExp(Variable, Token, name, visitVariableExpr);
 
-	class ASTPrinter : public ExpressionVisitor<std::string> {
+
+	class ExprASTPrinter : public ExpressionVisitor<std::string> {
 	public:
 		std::string print(Expr<std::string>* expr) {
 			return expr->accept(this);
+		}
+
+		std::string visitAssignExpr(Assign<std::string>* expr) {
+			return "( " + expr->name.lexeme + " = " + expr->value->accept(this) + " )";
 		}
 
 		std::string visitBinaryExpr(Binary<std::string>* expr) {
@@ -121,6 +136,12 @@ public:\
 
 		std::string visitUnaryExpr(Unary<std::string>* expr) {
 			const std::string ret = "( " + expr->op.lexeme + " " + expr->right->accept(this) + " )";
+			//printf("Visiting unary expression: %s\n", ret.c_str());
+			return ret;
+		}
+
+		std::string visitVariableExpr(Variable<std::string>* expr) {
+			const std::string ret = "( var '" + expr->name.lexeme + "' )";
 			//printf("Visiting unary expression: %s\n", ret.c_str());
 			return ret;
 		}

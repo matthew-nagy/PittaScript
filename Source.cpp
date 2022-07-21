@@ -2,9 +2,37 @@
 #include "PittaRuntime.hpp"
 #include "PittaInterpreter.hpp"
 
+class A {
+
+};
+
+class B : public A {
+
+};
+
 int main() {
 
-	std::string source = "print (17%5) >> 1;";
+	std::string source = "var a = \"global a\";\
+							var b = \"global b\";\
+							var c = \"global c\";\
+							{\
+								var a = \"outer a\";\
+								var b = \"outer b\";\
+								{\
+									var a = \"inner a\";\
+									print a;\
+									print b;\
+									print c;\
+								}\
+								print a;\
+								print b;\
+								print c;\
+							}\
+							print a;\
+							print b;\
+							print c; ";
+
+
 	pitta::Runtime runtime;
 
 	pitta::Scanner scanner(source, &runtime);

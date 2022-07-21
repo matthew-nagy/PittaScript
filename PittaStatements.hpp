@@ -3,20 +3,22 @@
 
 namespace pitta {
 
+    template<class T, class R>class Block;
     template<class T, class R>class Expression;
     template<class T, class R>class Print;
+    template<class T, class R>class Var;
 
     template<class T, class R>
 	class StatementVisitor {
     public:
-        //virtual T visitBlockStmt(Block<T, R>* stmt) = 0;
+        virtual T visitBlockStmt(Block<T, R>* stmt) = 0;
         //virtual T visitClassStmt(Class<T, R>* stmt) = 0;
         virtual T visitExpressionStmt(Expression<T, R>* stmt) = 0;
         //virtual T visitFunctionStmt(Function<T, R>* stmt) = 0;
         //virtual T visitIfStmt(If<T, R>* stmt) = 0;
         virtual T visitPrintStmt(Print<T, R>* stmt) = 0;
         //virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
-        //virtual T visitVarStmt(Var<T, R>* stmt) = 0;
+        virtual T visitVarStmt(Var<T, R>* stmt) = 0;
         //virtual T visitWhileStmt(Whil<T, R>* e stmt) = 0;
 	};
 
@@ -26,6 +28,20 @@ namespace pitta {
         virtual T accept(StatementVisitor<T, R>* visitor) = 0;
     };
 
+    template<class T, class R>
+    class Block : public Stmt<T, R> {
+    public:
+        std::vector<Stmt<T, R>*> statements;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitBlockStmt(this);
+        }
+
+        Block(const std::vector<Stmt<T, R>*>& statements) :
+            statements(statements)
+        {}
+
+    };
 
     template<class T, class R>
     class Expression : public Stmt<T, R> {
@@ -55,6 +71,62 @@ namespace pitta {
             expression(expression)
         {}
 
+    };
+
+    template<class T, class R>
+    class Var : public Stmt<T, R> {
+    public:
+        Token name;
+        Expr<R>* initializer;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitVarStmt(this);
+        }
+
+        Var(const Token& name, Expr<R>* initializer) :
+            name(name),
+            initializer(initializer)
+        {}
+
+    };
+
+
+    class StmtASTPrinter : public StatementVisitor<std::string, std::string> {
+    public:
+        std::string visitBlockStmt(Block<std::string, std::string>* stmt) {
+            std::string ret = getTabbedOut() + "< block :";
+            numOfTabsIn += 1;
+            for (auto& s : stmt->statements) {
+                ret += "\n" + s->accept(this);
+            }
+            numOfTabsIn -= 1;
+            ret += "\n" + getTabbedOut() = ">";
+            return ret;
+        }
+        //std::string visitClassStmt(Class<std::string, std::string>* stmt) = 0;
+        std::string visitExpressionStmt(Expression<std::string, std::string>* stmt) {
+            return getTabbedOut() + "<expr : " + stmt->expression->accept(&exprPrinter) + " >";
+        }
+        //std::string visitFunctionStmt(Function<std::string, std::string>* stmt) = 0;
+        //std::string visitIfStmt(If<std::string, std::string>* stmt) = 0;
+        std::string visitPrintStmt(Print<std::string, std::string>* stmt) {
+            return getTabbedOut() + "<print : " + stmt->expression->accept(&exprPrinter) + " >";
+        }
+        //std::string visitReturnStmt(Return<std::string, std::string>* stmt) = 0;
+        std::string visitVarStmt(Var<std::string, std::string>* stmt) {
+            return getTabbedOut() + "<var : " + stmt->name.lexeme + (stmt->initializer == nullptr ? "" : (" : " + stmt->initializer->accept(&exprPrinter))) + " >";
+        }
+        //std::string visitWhileStmt(Whil<std::string, std::string>* e stmt) = 0;
+    private:
+        ExprASTPrinter exprPrinter;
+        int numOfTabsIn = 0;
+
+        std::string getTabbedOut() {
+            std::string tab = "";
+            for (int i = 0; i < numOfTabsIn; i++)
+                tab += "\t";
+            return tab;
+        }
     };
 
 }
