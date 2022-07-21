@@ -4,7 +4,7 @@
 
 int main() {
 
-	std::string source = "1";
+	std::string source = "print (17%5) >> 1;";
 	pitta::Runtime runtime;
 
 	pitta::Scanner scanner(source, &runtime);

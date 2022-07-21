@@ -122,7 +122,7 @@ case OpType:\
 
 	void Interpreter::visitPrintStmt(Print<void, Value>* stmt) {
 		Value val = evaluate(stmt->expression);
-		printf("%s\n", val.toString());
+		printf("%s\n", val.toString().c_str());
 	}
 
 

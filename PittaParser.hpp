@@ -32,7 +32,7 @@ namespace pitta {
 		Runtime* runtime;
 
 		bool isAtEnd() {
-			return peek().type == EOF;
+			return peek().type == END_OF_FILE;
 		}
 
 		Token peek() {
