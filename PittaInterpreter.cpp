@@ -1,5 +1,6 @@
 #include "PittaInterpreter.hpp"
 #include "PittaRuntime.hpp"
+#include "PittaFunction.hpp"
 
 namespace pitta {
 
@@ -76,6 +77,30 @@ case OpType:\
 			throw new PittaRuntimeException("Unknown binary operator requested");
 		}
 #undef Numeric_Maths_Switch
+	}
+
+	Value Interpreter::visitCallExpr(Call<Value>* expr) {
+		Value callee = evaluate(expr->callee);
+
+		std::vector<Value> arguments;
+		arguments.reserve(expr->arguments.size());
+		for (Expr<Value>* arg : expr->arguments)
+			arguments.emplace_back(evaluate(arg));
+
+		if (callee.getType() != Function) {
+			runtime->error(expr->closingParenthesis, "Can only call functions and classes.");
+			throw new PittaRuntimeException("Can only call functions and classes.");
+		}
+
+		if (callee.asCallable()->getArity() != arguments.size()) {
+			std::string errMsg = "Incorrect number of arguments in function call. Passed in "
+				+ std::to_string(arguments.size()) + ", expected "
+				+ std::to_string(callee.asCallable()->getArity()) + ".";
+			runtime->error(expr->closingParenthesis, errMsg);
+			throw new PittaRuntimeException(errMsg);
+		}
+
+		return (*callee.asCallable())(this, arguments);
 	}
 
 	Value Interpreter::visitGroupingExpr(Grouping<Value>* expr) {
@@ -229,8 +254,19 @@ case OpType:\
 		}
 	}
 
-	Interpreter::Interpreter(Runtime* runtime) :
-		runtime(runtime)
-	{}
+	Interpreter::Interpreter(Runtime* runtime):
+		runtime(runtime),
+		globals(std::make_shared<Environment>())
+	{
+		environment = globals;
+	}
+
+
+	Interpreter::Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals):
+		runtime(runtime),
+		globals(globals)
+	{
+		environment = globals;
+	}
 
 }

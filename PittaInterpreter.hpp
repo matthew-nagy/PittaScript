@@ -1,6 +1,7 @@
 #pragma once
 #include "PittaStatements.hpp"
 #include "PittaEnvironment.hpp"
+#include "PittaRuntime.hpp"
 
 namespace pitta {
 	class Interpreter : public ExpressionVisitor<Value>, public StatementVisitor<void, Value> {
@@ -9,6 +10,8 @@ namespace pitta {
 		Value visitAssignExpr(Assign<Value>* expr);
 
 		Value visitBinaryExpr(Binary<Value>* expr);
+
+		Value visitCallExpr(Call<Value>* expr);
 
 		Value visitGroupingExpr(Grouping<Value>* expr);
 
@@ -38,10 +41,12 @@ namespace pitta {
 		void interpret(const std::vector<Stmt<void, Value>*>& statements);
 
 		Interpreter(Runtime* runtime);
+		Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals);
 	private:
 		Runtime* runtime;
 
-		std::shared_ptr<Environment> environment = std::make_shared<Environment>();
+		std::shared_ptr<Environment> globals;
+		std::shared_ptr<Environment> environment;
 
 		Value evaluate(Expr<Value>* expression);
 

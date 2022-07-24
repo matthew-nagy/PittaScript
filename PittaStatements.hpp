@@ -5,6 +5,7 @@ namespace pitta {
 
     template<class T, class R>class Block;
     template<class T, class R>class Expression;
+    template<class T, class R>class FunctionStmt;
     template<class T, class R> class If;
     template<class T, class R>class Print;
     template<class T, class R>class Var;
@@ -16,7 +17,7 @@ namespace pitta {
         virtual T visitBlockStmt(Block<T, R>* stmt) = 0;
         //virtual T visitClassStmt(Class<T, R>* stmt) = 0;
         virtual T visitExpressionStmt(Expression<T, R>* stmt) = 0;
-        //virtual T visitFunctionStmt(Function<T, R>* stmt) = 0;
+        virtual T visitFunctionStmt(FunctionStmt<T, R>* stmt) = 0;
         virtual T visitIfStmt(If<T, R>* stmt) = 0;
         virtual T visitPrintStmt(Print<T, R>* stmt) = 0;
         //virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
@@ -58,6 +59,24 @@ namespace pitta {
             expression(expression)
         {}
 
+    };
+
+    template<class T, class R>
+    class FunctionStmt : public Stmt<T, R> {
+    public:
+        Token name;
+        std::vector<Token> params;
+        std::vector<Stmt<T, R>> body;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitFunctionStmt(this);
+        }
+
+        FunctionStmt(Token name, const std::vector<Token>& params, const std::vector<Stmt<T, R>>& body):
+            name(name),
+            params(params),
+            body(body)
+        {}
     };
 
     template<class T, class R>
@@ -145,7 +164,9 @@ namespace pitta {
         std::string visitExpressionStmt(Expression<std::string, std::string>* stmt) {
             return getTabbedOut() + "<expr : " + stmt->expression->accept(&exprPrinter) + " >";
         }
-        //std::string visitFunctionStmt(Function<std::string, std::string>* stmt) = 0;
+        std::string visitFunctionStmt(FunctionStmt<std::string, std::string>* stmt) {
+            return "";
+        }
         std::string visitIfStmt(If<std::string, std::string>* stmt) {
             return getTabbedOut() + "<if  " + stmt->condition->accept(&exprPrinter) + " : " + stmt->thenBranch->accept(this) +
                 (stmt->elseBranch != nullptr ? (" else :" + stmt->elseBranch->accept(this)) : "") + " >";

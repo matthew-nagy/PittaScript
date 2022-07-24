@@ -2,6 +2,10 @@
 #include <initializer_list>
 #include "PittaStatements.hpp"
 
+#ifndef PITTA_MAX_FUNC_PARAMS
+#define PITTA_MAX_FUNC_PARAMS 255
+#endif
+
 namespace pitta {
 
 	template<class T, class R>
@@ -145,6 +149,20 @@ namespace pitta {
 		}
 
 
+		Expr<R>* finishCall(Expr<R>* callee) {
+			std::vector<Expr<R>*> arguments;
+			if (!check(RIGHT_PAREN)) {
+				do {
+					arguments.emplace_back(expression());
+				} while (match(COMMA));
+			}
+
+			Token paren = consume(RIGHT_PAREN,
+				"Expect ')' after arguments.");
+
+			return new Call<R>(callee, paren, arguments);
+		}
+
 
 		Expr<R>* expression() {
 			return assignment();
@@ -247,19 +265,31 @@ namespace pitta {
 				return track(new Unary<R>(op, right));
 			}
 
-			return primary();
+			return call();
+		}
+
+		Expr<R>* call() {
+			Expr<R>* expr = primary();
+
+			while (true) {
+				if (match(LEFT_PAREN))
+					expr = finishCall(expr);
+				else
+					break;
+			}
+
+			return expr;
 		}
 
 		Expr<R>* primary() {
-			Value value;
-			if (match(FALSE)) return track(new Literal<R>(value = false));
-			if (match(TRUE)) return track(new Literal<R>(value = true));
-			if (match(NIL)) return track(new Literal<R>(value = nullptr));
-			if (match(UNDEFINED)) return track(new Literal<R>(value = Undefined));
+			if (match(FALSE)) return track(new Literal<R>(false));
+			if (match(TRUE)) return track(new Literal<R>(true));
+			if (match(NIL)) return track(new Literal<R>((void*)nullptr));
+			if (match(UNDEFINED)) return track(new Literal<R>(Undefined));
 			if (match(IDENTIFIER)) return track(new Variable<R>(previous()));
 
 			if (match({ INT, FLOAT, STRING })) {
-				return track(new Literal<R>(value = previous().getLiteralValue()));
+				return track(new Literal<R>(previous().getLiteralValue()));
 			}
 
 			if (match(LEFT_PAREN)) {
@@ -276,7 +306,8 @@ namespace pitta {
 			try {
 				if (match(VAR))
 					return varDeclaration();
-
+				if (match(FUNC))
+					return function("function");
 				return statement();
 			}
 			catch (PittaRuntimeException* error) {
@@ -342,6 +373,26 @@ namespace pitta {
 				loopBody = track(new Block<T, R>({ initializer, loopBody }));
 
 			return loopBody;
+		}
+
+		Stmt<T, R>* function(const std::string& functionKind) {
+			Token name = consume(IDENTIFIER, "Expect " + functionKind + " name.");
+			consume(LEFT_PAREN, "Expect '(' after " + functionKind + " name.");
+			std::vector<Token> parameters;
+			if (!check(RIGHT_PAREN)) {
+				do {
+					if (parameters.size() >= PITTA_MAX_FUNC_PARAMS) {
+						error(peek(), "Can't have more than " + std::to_string(PITTA_MAX_FUNC_PARAMS) + " parameters.");
+					}
+
+					parameters.emplace_back(
+						consume(IDENTIFIER, "Expect parameter name."));
+				} while (match(COMMA));
+			}
+			consume(RIGHT_PAREN, "Expect ')' after parameters.");
+			consume(LEFT_BRACE, "Expect '{' before " + functionKind + " body.");
+			std::vector<Stmt> body = block();
+			return track(new FunctionStmt<T, R>(name, parameters, body));
 		}
 
 		Stmt<T, R>* ifStatement() {

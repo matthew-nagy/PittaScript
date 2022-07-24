@@ -28,7 +28,7 @@ namespace pitta {
 		virtual T visitUnaryExpr(Unary<T>* expr) = 0;
 		virtual T visitVariableExpr(Variable<T>* expr) = 0;
 		virtual T visitLogicalExpr(Logical<T>* expr) = 0;
-		//virtual T visitCallExpr(Call<T>* expr) = 0;
+		virtual T visitCallExpr(Call<T>* expr) = 0;
 		//virtual T visitGetExpr(Get<T>* expr) = 0;
 		//virtual T visitSetExpr(Set<T>* expr) = 0;
 		//virtual T visitThisExpr(This<T>* expr) = 0;
@@ -97,6 +97,8 @@ public:\
 
 	TripleArgExp(Binary, Expr<T>*, left, Token, op, Expr<T>*, right, visitBinaryExpr);
 
+	TripleArgExp(Call, Expr<T>*, callee, Token, closingParenthesis, std::vector<Expr<T>*>, arguments, visitCallExpr);
+
 	SingleArgExp(Grouping, Expr<T>*, expression, visitGroupingExpr);
 
 	SingleArgExp(Literal, Value, value, visitLiteralExpr);
@@ -122,6 +124,13 @@ public:\
 			const std::string ret = "( " + expr->op.lexeme + " " + expr->left->accept(this) + " " + expr->right->accept(this) + " )";
 			//printf("Visiting binary expression: %s\n", ret.c_str());
 			return ret;
+		}
+
+		std::string visitCallExpr(Call<std::string>* expr) {
+			std::string ret = "( call function on " + expr->callee->accept(this) + "with args (";
+			for (Expr<std::string>* arg : expr->arguments)
+				ret += arg->accept(this) + ", ";
+			return ret.substr(0, ret.size() - 2) + ") )";
 		}
 
 		std::string visitGroupingExpr(Grouping<std::string>* expr) {

@@ -20,6 +20,8 @@ namespace pitta {
 
 	extern const std::unordered_map<Type, std::string> c_typeToString;
 
+	class Callable;
+
 	std::string getSubstring(const std::string& from, int startIndex, int endIndex);
 
 	class Value {
@@ -31,15 +33,17 @@ namespace pitta {
 
 		bool isTruthy()const;
 
-		const int& asInt()const;
-		const float& asFloat()const;
-		const bool& asBool()const;
-		const std::string& asString()const;
+		int asInt()const;
+		float asFloat()const;
+		bool asBool()const;
+		std::string asString()const;
+		const Callable* asCallable()const;
 
 		void setInt(int value);
 		void setFloat(float value);
 		void setBool(bool value);
 		void setString(const std::string& value);
+		void setCallable(const Callable* callable);
 		void setNull();
 		void setUndefined();
 
@@ -53,7 +57,7 @@ namespace pitta {
 		Value& operator=(float value);
 		Value& operator=(bool value);
 		Value& operator=(const std::string& value);
-		Value& operator=(void*);
+		Value& operator=(const Callable* callable);
 		Value& operator=(Type);
 
 		bool operator==(const Value& right)const;
@@ -62,7 +66,12 @@ namespace pitta {
 		Value(int val);
 		Value(float val);
 		Value(bool val);
-		Value(const std::string& val);
+		Value(const std::string & val);
+		Value(int* val);
+		Value(float* val);
+		Value(bool* val);
+		Value(std::string* val);
+		Value(const Callable* callable);
 
 	private:
 		Type type = Undefined;
@@ -73,6 +82,7 @@ namespace pitta {
 			float floatVal, * floatValP;
 			bool boolVal, * boolValP;
 			std::string* stringValP;
+			const Callable* func;
 		} rep;
 		std::string stringVal;
 	};

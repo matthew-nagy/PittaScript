@@ -1,4 +1,5 @@
 #include "PittaValue.hpp"
+#include "PittaFunction.hpp"
 
 #define basic_numerics \
 switch (type) {\
@@ -80,6 +81,8 @@ namespace pitta {
 			return asBool();
 		case String:
 			return asString().size() > 0;
+		case Function:
+			return true;
 		case Null:
 		case Undefined:
 		default:
@@ -109,29 +112,39 @@ namespace pitta {
 				return *rep.stringValP;
 			else
 				return stringVal;
+		case Function:
+			return "Function of arity " + rep.func->getArity();
 		case Null:
 			return "Null";
 		case Undefined:
 			return "Undefined";
+		default:
+			throw new PittaRuntimeException("Error: Unknown type");
+			return "Error: Unknown type";
 		}
 	}
 
-	const int& Value::asInt()const {
+	int Value::asInt()const {
 		basic_numerics
 	}
-	const float& Value::asFloat()const {
+	float Value::asFloat()const {
 		basic_numerics
 	}
-	const bool& Value::asBool()const {
+	bool Value::asBool()const {
 		basic_numerics
 	}
-	const std::string& Value::asString()const {
+	std::string Value::asString()const {
 		if (type == String) {
 			if (isBoundValue())
 				return *rep.stringValP;
 			return stringVal;
 		}
 		throw new PittaRuntimeException("No string conversion acceptable");
+	}
+	const Callable* Value::asCallable()const {
+		if (type == Function)
+			return rep.func;
+		throw new PittaRuntimeException("No function conversion acceptable");
 	}
 
 	void Value::setInt(int value) {
@@ -171,6 +184,12 @@ namespace pitta {
 			type = String;
 			stringVal = value;
 		}
+	}
+	void Value::setCallable(const Callable* callable) {
+		if (!(type == Null || type == Undefined || type == Function))
+			throw new PittaRuntimeException("Cannot assign a non-function, null or undefined value to a function");
+		type = Function;
+		rep.func = callable;
 	}
 	void Value::setNull() {
 		if (isBoundValue()) {
@@ -243,8 +262,11 @@ namespace pitta {
 		setString(value);
 		return *this;
 	}
-	Value& Value::operator=(void*) {
-		setNull();
+	Value& Value::operator=(const Callable* callable) {
+		if (callable == nullptr)
+			setNull();
+		else
+			setCallable(callable);
 		return *this;
 	}
 	Value& Value::operator=(Type) {
@@ -288,6 +310,21 @@ namespace pitta {
 	}
 	Value::Value(const std::string& val) {
 		setString(val);
+	}
+	Value::Value(int* val) {
+		bindInt(val);
+	}
+	Value::Value(float* val) {
+		bindFloat(val);
+	}
+	Value::Value(bool* val) {
+		bindBool(val);
+	}
+	Value::Value(std::string* val) {
+		bindString(val);
+	}
+	Value::Value(const Callable* callable) {
+		setCallable(callable);
 	}
 
 }
