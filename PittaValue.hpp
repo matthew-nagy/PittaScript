@@ -7,15 +7,11 @@ namespace pitta {
 
 	class PittaRuntimeException final : public std::runtime_error {
 	public:
+		std::string details;
 
-		const char* what()const noexcept override {
-			return (std::string("Pitta runtime exception: ") + std::runtime_error::what()).c_str();
-		}
+		const char* what()const noexcept override;
 
-		PittaRuntimeException(const std::string& detail):
-			std::runtime_error(detail)
-		{}
-	private:
+		PittaRuntimeException(const std::string& detail);
 	};
 
 	enum Type {
@@ -61,6 +57,12 @@ namespace pitta {
 		Value& operator=(Type);
 
 		bool operator==(const Value& right)const;
+
+		Value() = default;
+		Value(int val);
+		Value(float val);
+		Value(bool val);
+		Value(const std::string& val);
 
 	private:
 		Type type = Undefined;

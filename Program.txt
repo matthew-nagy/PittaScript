@@ -1,0 +1,11 @@
+print "Welcome to the program!";
+print "Looping test!";
+for(var i = 0; i < 5; i = i + 1){
+	var temp = 0;
+	while(temp <= i){
+		print temp;
+		temp = temp + 1;
+	}
+}
+
+print "Loop test over";

@@ -4,17 +4,43 @@
 
 namespace pitta {
 
+	template<class T, class R>
+	class AbstractSyntaxTree {
+	public:
+		const std::vector<Stmt<T, R>*> statements;
 
+		AbstractSyntaxTree(const std::vector<Stmt<T, R>*>& statements,
+				const std::vector<Stmt<T, R>*>& allStatementPointers, 
+				const std::vector<Expr<R>*>& allExpressionPointers):
+			statements(statements),
+			allStatementPointers(allStatementPointers),
+			allExpressionPointers(allExpressionPointers)
+		{}
+		
+		~AbstractSyntaxTree() {
+			for (Stmt<T, R>* stmt : allStatementPointers)
+				delete stmt;
+			for (Expr<R>* expr : allExpressionPointers)
+				delete expr;
+		}
+
+	private:
+		std::vector<Stmt<T, R>*> allStatementPointers;
+		std::vector<Expr<R>*> allExpressionPointers;
+	};
+
+	template<class T, class R>
 	class Parser {
 	public:
 
-		template<class T, class R>
-		std::vector<Stmt<T, R>*> parse() {
+		AbstractSyntaxTree<T, R> parse() {
+			allExpressions.clear();
+			allStatements.clear();
 			std::vector<Stmt<T, R>*> statements;
 			while (!isAtEnd())
-				statements.emplace_back(declaration <T, R>());
+				statements.emplace_back(declaration());
 
-			return statements;
+			return AbstractSyntaxTree<T, R>(statements, allStatements, allExpressions);
 		}
 
 		Parser(const std::vector<Token>& tokens, Runtime* runtime) :
@@ -30,6 +56,19 @@ namespace pitta {
 		int current = 0;
 
 		Runtime* runtime;
+		std::vector<Expr<R>*> allExpressions;
+		std::vector<Stmt<T, R>*> allStatements;
+
+		Expr<R>* track(Expr<R>* expr) {
+			allExpressions.emplace_back(expr);
+			return expr;
+		}
+		Stmt<T, R>* track(Stmt<T, R>* stmt) {
+			allStatements.emplace_back(stmt);
+			return stmt;
+		}
+
+
 
 		bool isAtEnd() {
 			return peek().type == END_OF_FILE;
@@ -71,7 +110,10 @@ namespace pitta {
 			return false;
 		}
 
-		PittaRuntimeException* error(Token token, const std::string& message);
+		PittaRuntimeException* error(Token token, const std::string& message) {
+			runtime->error(token, message);
+			return new PittaRuntimeException("See log for detail");
+		}
 
 		Token consume(TokenType type, const std::string& message) {
 			if (check(type)) return advance();
@@ -104,22 +146,20 @@ namespace pitta {
 
 
 
-		template<class T>
-		Expr<T>* expression() {
-			return assignment<T>();
+		Expr<R>* expression() {
+			return assignment();
 		}
 
-		template<class T>
-		Expr<T>* assignment() {
-			Expr<T>* expr = equality<T>();
+		Expr<R>* assignment() {
+			Expr<R>* expr = orExpr();
 
 			if (match(EQUAL)) {
 				Token equals = previous();
-				Expr<T>* value = assignment<T>();
+				Expr<R>* value = assignment();
 
-				if (expr->getType() == typeid(Variable<T>)) {
-					Token name = ((Variable<T>*)expr)->name;
-					return new Assign<T>(name, value);
+				if (expr->getType() == typeid(Variable<R>)) {
+					Token name = ((Variable<R>*)expr)->name;
+					return track(new Assign<R>(name, value));
 				}
 
 				error(equals, "Invalid assignment target.");
@@ -128,99 +168,116 @@ namespace pitta {
 			return expr;
 		}
 
-		template<class T>
-		Expr<T>* equality() {
-			Expr<T>* expr = comparison<T>();
+		Expr<R>* orExpr() {
+			Expr<R>* expr = andExpr();
+
+			while (match(OR)) {
+				Token op = previous();
+				Expr<R>* right = andExpr();
+				expr = track(new Logical<R>(expr, op, right));
+			}
+
+			return expr;
+		}
+
+		Expr<R>* andExpr(){
+			Expr<R>* expr = equality();
+
+			while (match(AND)) {
+				Token op = previous();
+				Expr<R>* right = equality();
+				expr = track(new Logical<R>(expr, op, right));
+			}
+
+			return expr;
+		}
+
+		Expr<R>* equality() {
+			Expr<R>* expr = comparison();
 
 			while (match({ BANG_EQUAL, EQUAL_EQUAL })) {
 				Token op = previous();
-				Expr<T>* right = comparison<T>();
-				expr = new Binary<T>(expr, op, right);
+				Expr<R>* right = comparison();
+				expr = track(new Binary<R>(expr, op, right));
 			}
 
 			return expr;
 		}
 
-		template<class T>
-		Expr<T>* comparison() {
-			Expr<T>* expr = term<T>();
+		Expr<R>* comparison() {
+			Expr<R>* expr = term();
 
 			while (match({ GREATER, GREATER_EQUAL, LESS, LESS_EQUAL })) {
 				Token op = previous();
-				Expr<T>* right = term<T>();
-				expr = new Binary<T>(expr, op, right);
+				Expr<R>* right = term();
+				expr = track(new Binary<R>(expr, op, right));
 			}
 
 			return expr;
 		}
 
-		template<class T>
-		Expr<T>* term() {
-			Expr<T>* expr = factor<T>();
+		Expr<R>* term() {
+			Expr<R>* expr = factor();
 
 			while (match({ MINUS, PLUS, PERCENT, BIT_AND, BIT_OR, STRING_CONCAT, SHIFT_LEFT, SHIFT_RIGHT })) {
 				Token op = previous();
-				Expr<T>* right = factor<T>();
-				expr = new Binary<T>(expr, op, right);
+				Expr<R>* right = factor();
+				expr = track(new Binary<R>(expr, op, right));
 			}
 
 			return expr;
 		}
 
-		template<class T>
-		Expr<T>* factor() {
-			Expr<T>* expr = unary<T>();
+		Expr<R>* factor() {
+			Expr<R>* expr = unary();
 
 			while (match({ SLASH, STAR })) {
 				Token op = previous();
-				Expr<T>* right = unary<T>();
-				expr = new Binary<T>(expr, op, right);
+				Expr<R>* right = unary();
+				expr = track(new Binary<R>(expr, op, right));
 			}
 
 			return expr;
 		}
 
-		template<class T>
-		Expr<T>* unary() {
+		Expr<R>* unary() {
 			if (match({ BANG, MINUS })) {
 				Token op = previous();
-				Expr<T>* right = unary<T>();
-				return new Unary<T>(op, right);
+				Expr<R>* right = unary();
+				return track(new Unary<R>(op, right));
 			}
 
-			return primary<T>();
+			return primary();
 		}
 
-		template<class T>
-		Expr<T>* primary() {
+		Expr<R>* primary() {
 			Value value;
-			if (match(FALSE)) return new Literal<T>(value = false);
-			if (match(TRUE)) return new Literal<T>(value = true);
-			if (match(NIL)) return new Literal<T>(value = nullptr);
-			if (match(UNDEFINED)) return new Literal<T>(value = Undefined);
-			if (match(IDENTIFIER)) return new Variable<T>(previous());
+			if (match(FALSE)) return track(new Literal<R>(value = false));
+			if (match(TRUE)) return track(new Literal<R>(value = true));
+			if (match(NIL)) return track(new Literal<R>(value = nullptr));
+			if (match(UNDEFINED)) return track(new Literal<R>(value = Undefined));
+			if (match(IDENTIFIER)) return track(new Variable<R>(previous()));
 
 			if (match({ INT, FLOAT, STRING })) {
-				return new Literal<T>(value = previous().getLiteralValue());
+				return track(new Literal<R>(value = previous().getLiteralValue()));
 			}
 
 			if (match(LEFT_PAREN)) {
-				Expr<T>* expr = expression<T>();
+				Expr<R>* expr = expression();
 				consume(RIGHT_PAREN, "Expect ')' after expression.");
-				return new Grouping<T>(expr);
+				return track(new Grouping<R>(expr));
 			}
 
 			throw error(peek(), "Expect expression.");
 		}
 
 
-		template<class T, class R>
 		Stmt<T, R>* declaration() {
 			try {
 				if (match(VAR))
-					return varDeclaration<T, R>();
+					return varDeclaration();
 
-				return statement<T, R>();
+				return statement();
 			}
 			catch (PittaRuntimeException* error) {
 				synchronize();
@@ -228,66 +285,104 @@ namespace pitta {
 			}
 		}
 
-		template<class T,class R>
 		Stmt<T, R>* statement() {
-			if (match(IF)) return ifStatement<T, R>();
-			if (match(LEFT_BRACE))return new Block<T, R>(block<T, R>());
-			if (match(PRINT))return printStatement<T, R>();
+			if (match(IF)) return ifStatement();
+			if (match(LEFT_BRACE))return track(new Block<T, R>(block()));
+			if (match(WHILE))return whileStatement();
+			if (match(FOR))return forStatement();
+			if (match(PRINT))return printStatement();
 
-			return expressionStatement<T, R>();
+			return expressionStatement();
 		}
 
-		template<class T, class R>
 		std::vector<Stmt<T, R>*> block() {
 			std::vector<Stmt<T, R>*> statements;
 
 			while (!check(RIGHT_BRACE) && !isAtEnd())
-				statements.emplace_back(declaration<T, R>());
+				statements.emplace_back(declaration());
 
 			consume(RIGHT_BRACE, "Expect '}' after block.");
 			return statements;
 		}
 
-		template<class T, class R>
 		Stmt<T, R>* expressionStatement() {
-			Expr<R>* expr = expression<R>();
+			Expr<R>* expr = expression();
 			consume(SEMICOLON, "Expect ';' after expression");
-			return new Expression<T, R>(expr);
+			return track(new Expression<T, R>(expr));
 		}
 
-		template<class T, class R>
+		Stmt<T, R>* forStatement() {
+			consume(LEFT_PAREN, "Expect '(' after 'for'.");
+			Stmt<T, R>* initializer = nullptr;
+			if (match(VAR))
+				initializer = varDeclaration();
+			else if (!match(SEMICOLON))
+				initializer = expressionStatement();
+
+			Expr<R>* condition;
+			if (!check(SEMICOLON))
+				condition = expression();
+			else
+				condition = track(new Literal<R>(true));
+			consume(SEMICOLON, "Expect ';' after loop condition.");
+
+			Expr<R>* increment;
+			if (!check(RIGHT_PAREN))
+				increment = expression();
+			else
+				increment = track(new Literal<R>(true));
+			consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+
+			Stmt<T, R>* loopBody = statement();
+
+
+			loopBody = track(new Block<T, R>({ loopBody, track(new Expression<T, R>(increment)) }));
+			loopBody = track(new While<T, R>(condition, loopBody));
+			if (initializer != nullptr)
+				loopBody = track(new Block<T, R>({ initializer, loopBody }));
+
+			return loopBody;
+		}
+
 		Stmt<T, R>* ifStatement() {
 			consume(LEFT_PAREN, "Expect '(' after 'if'.");
-			Expr<R>* condition = expression<R>();
+			Expr<R>* condition = expression();
 			consume(RIGHT_PAREN, "Expect ')' after if condition.");
 
-			Stmt<T, R>* thenBranch = statement<T, R>();
+			Stmt<T, R>* thenBranch = statement();
 			Stmt<T, R>* elseBranch = nullptr;
 			if (match(ELSE)) {
-				elseBranch = statement<T, R>();
+				elseBranch = statement();
 			}
 
-			return new If<T, R>(condition, thenBranch, elseBranch);
+			return track(new If<T, R>(condition, thenBranch, elseBranch));
 		}
 
-		template<class T, class R>
 		Stmt<T, R>* printStatement() {
-			Expr<R>* expr = expression<R>();
+			Expr<R>* expr = expression();
 			consume(SEMICOLON, "Expect ';' after value");
-			return new Print<T, R>(expr);
+			return track(new Print<T, R>(expr));
 		}
 
-		template<class T, class R>
 		Stmt<T, R>* varDeclaration() {
 			Token name = consume(IDENTIFIER, "Expect variable name.");
 
 			Expr<R>* initializer = nullptr;
 			if (match(EQUAL)) {
-				initializer = expression<R>();
+				initializer = expression();
 			}
 
 			consume(SEMICOLON, "Expect ';' after variable declaration");
-			return new Var<T, R>(name, initializer);
+			return track(new Var<T, R>(name, initializer));
+		}
+
+		Stmt<T, R>* whileStatement() {
+			consume(LEFT_PAREN, "Expect '(' after 'while'.");
+			Expr<R>* condition = expression();
+			consume(RIGHT_PAREN, "Expect ')' after condition.");
+			Stmt<T, R>* body = statement();
+
+			return track(new While<T, R>(condition, body));
 		}
 
 		/*template<class T, class R>

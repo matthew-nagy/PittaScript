@@ -12,7 +12,6 @@ namespace pitta {
 	Value Interpreter::visitBinaryExpr(Binary<Value>* expr) {
 		Value left = evaluate(expr->left);
 		Value right = evaluate(expr->right);
-		Value result;
 
 		const std::string invalidTypeMsg = "Invalid numeric types for operator";
 
@@ -20,9 +19,9 @@ namespace pitta {
 			case OpType:\
 				switch (left.getType()) {\
 				case Int:\
-					return result = (left.asInt() Symbol right.asInt());\
+					return left.asInt() Symbol right.asInt();\
 				case Float:\
-					return result = (left.asFloat() Symbol right.asFloat());\
+					return left.asFloat() Symbol right.asFloat();\
 				default:\
 					printf("Values are %s (%s) and %s (%s)\n", left.toString().c_str(), c_typeToString.at(left.getType()).c_str(), right.toString().c_str(), c_typeToString.at(right.getType()).c_str());\
 					runtime->error(expr->op, invalidTypeMsg);\
@@ -36,7 +35,7 @@ case OpType:\
 		throw new PittaRuntimeException("Operator can only interact with integer values");\
 	}\
 	else\
-		return result = (left.asInt() Symbol right.asInt());\
+		return left.asInt() Symbol right.asInt();\
 	break
 
 		switch (expr->op.type) {
@@ -46,9 +45,9 @@ case OpType:\
 			Numeric_Maths_Switch(STAR, *);
 
 		case EQUAL_EQUAL:
-			return result = (left == right);
+			return left == right;
 		case BANG_EQUAL:
-			return result = !(left == right);
+			return !(left == right);
 			Numeric_Maths_Switch(LESS, < );
 			Numeric_Maths_Switch(GREATER, > );
 			Numeric_Maths_Switch(LESS_EQUAL, <= );
@@ -56,9 +55,9 @@ case OpType:\
 
 		case SHIFT_LEFT:
 			printf("%d << %d = %d\n", left.asInt(), right.asInt(), left.asInt() << right.asInt());
-			return result = (left.asInt() << right.asInt());
+			return left.asInt() << right.asInt();
 		case SHIFT_RIGHT:
-			return result = (left.asInt() >> right.asInt());
+			return left.asInt() >> right.asInt();
 
 		case STRING_CONCAT:
 			if (left.getType() != String || right.getType() != String) {
@@ -66,7 +65,7 @@ case OpType:\
 				throw new PittaRuntimeException("Non string values cannot undergo string style concatination");
 			}
 			else {
-				return result = (left.asString() + right.asString());
+				return left.asString() + right.asString();
 			}
 			Integer_Maths_Switch(BIT_AND, &);
 			Integer_Maths_Switch(BIT_OR, | );
@@ -83,31 +82,39 @@ case OpType:\
 		return evaluate(expr->expression);
 	}
 
+	Value Interpreter::visitLogicalExpr(Logical<Value>* expr) {
+		Value left = evaluate(expr->left);
+
+		if (expr->op.type == OR) 
+			return left.isTruthy() ? left : evaluate(expr->right);
+		
+		return left.isTruthy() ? evaluate(expr->right) : left;
+	}
+
 	Value Interpreter::visitLiteralExpr(Literal<Value>* expr) {
 		return expr->value;
 	}
 
 	Value Interpreter::visitUnaryExpr(Unary<Value>* expr) {
 		Value right = evaluate(expr->right);
-		Value toReturn;
 
 		switch (expr->op.type) {
 		case MINUS:
 			switch (right.getType()) {
 			case Int:
-				return toReturn = (-1 * right.asInt());
+				return -1 * right.asInt();
 			case Float:
-				return toReturn = (-1.0f * right.asFloat());
+				return -1.0f * right.asFloat();
 			default:
 				runtime->error(expr->op, "Negation must be followed by and integer or floating point value");
 				throw new PittaRuntimeException("Negation must be followed by and integer or floating point value");
 			}
 			break;
 		case BANG:
-			return toReturn = !right.isTruthy();
+			return !right.isTruthy();
 		case BIT_NOT:
 			if (right.getType() == Int) {
-				return toReturn = ~right.asInt();
+				return ~right.asInt();
 			}
 			else {
 				runtime->error(expr->op, "Logical not operator may only be applied to integer values");
@@ -115,7 +122,7 @@ case OpType:\
 			}
 		}
 
-		return toReturn = Undefined;
+		return Undefined;
 	}
 
 	Value Interpreter::visitVariableExpr(Variable<Value>* expr) {
@@ -162,6 +169,12 @@ case OpType:\
 		environment->define(stmt->name.lexeme, value);
 	}
 
+	void Interpreter::visitWhileStmt(While<void, Value>* stmt) {
+		while (evaluate(stmt->condition).isTruthy()) {
+			execute(stmt->body);
+		}
+	}
+
 	void Interpreter::execute(Stmt<void, Value>* stmt) {
 		stmt->accept(this);
 	}
@@ -191,7 +204,7 @@ case OpType:\
 			for (Stmt<void, Value>* statement : statements)
 				execute(statement);
 		}
-		catch (std::runtime_error* error) {
+		catch (PittaRuntimeException* error) {
 			throw(error);
 		}
 	}

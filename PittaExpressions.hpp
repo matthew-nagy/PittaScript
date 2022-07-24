@@ -27,7 +27,7 @@ namespace pitta {
 		virtual T visitGroupingExpr(Grouping<T>* expr) = 0;
 		virtual T visitUnaryExpr(Unary<T>* expr) = 0;
 		virtual T visitVariableExpr(Variable<T>* expr) = 0;
-		//virtual T visitLogicalExpr(Logical<T>* expr) = 0;
+		virtual T visitLogicalExpr(Logical<T>* expr) = 0;
 		//virtual T visitCallExpr(Call<T>* expr) = 0;
 		//virtual T visitGetExpr(Get<T>* expr) = 0;
 		//virtual T visitSetExpr(Set<T>* expr) = 0;
@@ -101,6 +101,8 @@ public:\
 
 	SingleArgExp(Literal, Value, value, visitLiteralExpr);
 
+	TripleArgExp(Logical, Expr<T>*, left, Token, op, Expr<T>*, right, visitLogicalExpr);
+
 	DoubleArgExp(Unary, Token, op, Expr<T>*, right, visitUnaryExpr);
 
 	SingleArgExp(Variable, Token, name, visitVariableExpr);
@@ -130,6 +132,12 @@ public:\
 
 		std::string visitLiteralExpr(Literal<std::string>* expr) {
 			const std::string ret = "( " + expr->value.toString() + " )";
+			//printf("Visiting literal expression: %s\n", ret.c_str());
+			return ret;
+		}
+
+		std::string visitLogicalExpr(Logical<std::string>* expr) {
+			const std::string ret = "( " + expr->left->accept(this) + " " + expr->op.lexeme + " " + expr->left->accept(this) + " )";
 			//printf("Visiting literal expression: %s\n", ret.c_str());
 			return ret;
 		}

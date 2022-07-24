@@ -38,6 +38,20 @@ switch (type) {\
 
 namespace pitta {
 
+
+
+	const char* PittaRuntimeException::what()const noexcept {
+		return (std::string("Pitta runtime exception: ") + std::runtime_error::what()).c_str();
+	}
+
+	PittaRuntimeException::PittaRuntimeException(const std::string& detail) :
+		std::runtime_error(detail),
+		details(detail)
+	{}
+
+
+
+
 		//Int, Float, String, Bool, Null, Undefined, Instance, Class, Function
 #define TS(type) { type, #type }
 	const std::unordered_map<Type, std::string> c_typeToString = {
@@ -263,6 +277,18 @@ namespace pitta {
 		return false;
 	}
 
+	Value::Value(int val) {
+		setInt(val);
+	}
+	Value::Value(float val) {
+		setFloat(val);
+	}
+	Value::Value(bool val) {
+		setBool(val);
+	}
+	Value::Value(const std::string& val) {
+		setString(val);
+	}
 
 }
 

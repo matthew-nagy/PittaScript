@@ -14,6 +14,8 @@ namespace pitta {
 
 		Value visitLiteralExpr(Literal<Value>* expr);
 
+		Value visitLogicalExpr(Logical<Value>* expr);
+
 		Value visitUnaryExpr(Unary<Value>* expr);
 
 		Value visitVariableExpr(Variable<Value>* expr);
@@ -29,6 +31,8 @@ namespace pitta {
 		void visitPrintStmt(Print<void, Value>* stmt);
 
 		void visitVarStmt(Var<void, Value>* stmt);
+
+		void visitWhileStmt(While<void, Value>* stmt);
 
 		void interpret(Expr<Value>* expression);
 		void interpret(const std::vector<Stmt<void, Value>*>& statements);

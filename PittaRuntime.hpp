@@ -11,38 +11,18 @@ namespace pitta {
 	public:
 		bool hadError = false;
 
-		void error(int line, const std::string& message) {
-			report(line, "", message);
-		}
+		void error(int line, const std::string& message);
 
-		void error(Token token, const std::string& message) {
-			if (token.type == TokenType::END_OF_FILE) {
-				report(token.line, " at end", message);
-			}
-			else {
-				report(token.line, " at '" + token.lexeme + "'", message);
-			}
-		}
+		void error(Token token, const std::string& message);
 
-		void runtimeError(PittaRuntimeException* exception) {
-			report(exception);
-		}
+		void runtimeError(PittaRuntimeException* exception);
 
-		std::vector<Token> scan(const std::string& source) {
-			Scanner scanner(source, this);
-			return scanner.scanTokens();
-		}
+		std::vector<Token> scan(const std::string& source);
 
 	private:
-		void report(int line, const std::string& where, const std::string& message) {
-			printf("[line %d] Error%s: %s\n", line, where.c_str(), message.c_str());
-			hadError = true;
-		}
+		void report(int line, const std::string& where, const std::string& message);
 
-		void report(PittaRuntimeException* exception) {
-			printf("Runtime error: %s\n", exception->what());
-			hadError = true;
-		}
+		void report(PittaRuntimeException* exception);
 	};
 
 }

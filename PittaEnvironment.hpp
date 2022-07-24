@@ -11,43 +11,18 @@ namespace pitta {
 
 		std::shared_ptr<Environment> enclosing;
 
-		void define(const std::string& name, const Value value) {
-			values.emplace(name, value);
-		}
+		void define(const std::string& name, const Value value);
 
-		void assign(const std::string& name, const Value& value) {
-			if (values.count(name) > 0)
-				values.at(name) = value;
-			if (enclosing != nullptr)
-				enclosing->assign(name, value);
+		void assign(const std::string& name, const Value& value);
 
-			throw new PittaRuntimeException("Undefined variable '" + name + "'.");
-		}
+		void assign(const Token& name, const Value& value);
 
-		void assign(const Token& name, const Value& value) {
-			assign(name.lexeme, value);
-		}
+		Value get(const std::string& name);
+		Value get(const Token& token);
 
-		Value get(const std::string& name) {
-			if (values.count(name) > 0)
-				return values.at(name);
-
-			if (enclosing != nullptr)
-				return enclosing->get(name);
-
-			throw new PittaRuntimeException("Undefined variable '" + name + "'.");
-		}
-		Value get(const Token& token) {
-			return get(token.lexeme);
-		}
-
-		Environment():
-			enclosing(nullptr)
-		{}
+		Environment();
 		
-		Environment(const std::shared_ptr<Environment>& enclosing):
-			enclosing(enclosing)
-		{}
+		Environment(const std::shared_ptr<Environment>& enclosing);
 
 	private:
 

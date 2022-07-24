@@ -8,6 +8,7 @@ namespace pitta {
     template<class T, class R> class If;
     template<class T, class R>class Print;
     template<class T, class R>class Var;
+    template<class T, class R>class While;
 
     template<class T, class R>
 	class StatementVisitor {
@@ -20,7 +21,7 @@ namespace pitta {
         virtual T visitPrintStmt(Print<T, R>* stmt) = 0;
         //virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
         virtual T visitVarStmt(Var<T, R>* stmt) = 0;
-        //virtual T visitWhileStmt(Whil<T, R>* e stmt) = 0;
+        virtual T visitWhileStmt(While<T, R>* stmt) = 0;
 	};
 
     template<class T, class R>
@@ -110,6 +111,23 @@ namespace pitta {
 
     };
 
+    template<class T, class R>
+    class While : public Stmt<T, R> {
+    public:
+        Expr<R>* condition;
+        Stmt<T, R>* body;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitWhileStmt(this);
+        }
+
+        While(Expr<R>* condition, Stmt<T, R>* body) :
+            condition(condition),
+            body(body)
+        {}
+
+    };
+
 
     class StmtASTPrinter : public StatementVisitor<std::string, std::string> {
     public:
@@ -139,7 +157,14 @@ namespace pitta {
         std::string visitVarStmt(Var<std::string, std::string>* stmt) {
             return getTabbedOut() + "<var : " + stmt->name.lexeme + (stmt->initializer == nullptr ? "" : (" : " + stmt->initializer->accept(&exprPrinter))) + " >";
         }
-        //std::string visitWhileStmt(Whil<std::string, std::string>* e stmt) = 0;
+        std::string visitWhileStmt(While<std::string, std::string>* stmt) {
+            std::string ret = getTabbedOut() + "<while : " + stmt->condition->accept(&exprPrinter);
+            numOfTabsIn += 1;
+            ret += "\n" + stmt->body->accept(this);
+            numOfTabsIn -= 1;
+            ret += "\n" + getTabbedOut() = ">";
+            return ret;
+        }
     private:
         ExprASTPrinter exprPrinter;
         int numOfTabsIn = 0;
