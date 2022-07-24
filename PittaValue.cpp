@@ -50,6 +50,10 @@ namespace pitta {
 		details(detail)
 	{}
 
+	PittaReturn::PittaReturn(Value value) :
+		std::runtime_error("Return exception; should be caught"),
+		value(value)
+	{}
 
 
 
@@ -113,7 +117,7 @@ namespace pitta {
 			else
 				return stringVal;
 		case Function:
-			return "Function of arity " + rep.func->getArity();
+			return "Function " + rep.func->getName() + " with arity " + std::to_string(rep.func->getArity());
 		case Null:
 			return "Null";
 		case Undefined:

@@ -8,6 +8,7 @@ namespace pitta {
     template<class T, class R>class FunctionStmt;
     template<class T, class R> class If;
     template<class T, class R>class Print;
+    template<class T, class R>class Return;
     template<class T, class R>class Var;
     template<class T, class R>class While;
 
@@ -20,7 +21,7 @@ namespace pitta {
         virtual T visitFunctionStmt(FunctionStmt<T, R>* stmt) = 0;
         virtual T visitIfStmt(If<T, R>* stmt) = 0;
         virtual T visitPrintStmt(Print<T, R>* stmt) = 0;
-        //virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
+        virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
         virtual T visitVarStmt(Var<T, R>* stmt) = 0;
         virtual T visitWhileStmt(While<T, R>* stmt) = 0;
 	};
@@ -66,13 +67,13 @@ namespace pitta {
     public:
         Token name;
         std::vector<Token> params;
-        std::vector<Stmt<T, R>> body;
+        std::vector<Stmt<T, R>*> body;
 
         T accept(StatementVisitor<T, R>* visitor) {
             return visitor->visitFunctionStmt(this);
         }
 
-        FunctionStmt(Token name, const std::vector<Token>& params, const std::vector<Stmt<T, R>>& body):
+        FunctionStmt(Token name, const std::vector<Token>& params, const std::vector<Stmt<T, R>*>& body):
             name(name),
             params(params),
             body(body)
@@ -111,6 +112,22 @@ namespace pitta {
             expression(expression)
         {}
 
+    };
+
+    template<class T, class R>
+    class Return : public Stmt<T, R> {
+    public:
+        Token keyword;
+        Expr<R>* value;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitReturnStmt(this);
+        }
+
+        Return(Token keyword, Expr<R>* value):
+            keyword(keyword),
+            value(value)
+        {}
     };
 
     template<class T, class R>
@@ -174,7 +191,9 @@ namespace pitta {
         std::string visitPrintStmt(Print<std::string, std::string>* stmt) {
             return getTabbedOut() + "<print : " + stmt->expression->accept(&exprPrinter) + " >";
         }
-        //std::string visitReturnStmt(Return<std::string, std::string>* stmt) = 0;
+        std::string visitReturnStmt(Return<std::string, std::string>* stmt) {
+            return "<return: " + stmt->value->accept(&exprPrinter) + ">";
+        }
         std::string visitVarStmt(Var<std::string, std::string>* stmt) {
             return getTabbedOut() + "<var : " + stmt->name.lexeme + (stmt->initializer == nullptr ? "" : (" : " + stmt->initializer->accept(&exprPrinter))) + " >";
         }

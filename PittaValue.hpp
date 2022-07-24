@@ -5,15 +5,6 @@
 
 namespace pitta {
 
-	class PittaRuntimeException final : public std::runtime_error {
-	public:
-		std::string details;
-
-		const char* what()const noexcept override;
-
-		PittaRuntimeException(const std::string& detail);
-	};
-
 	enum Type {
 		Int, Float, String, Bool, Null, Undefined, Instance, Class, Function
 	};
@@ -85,6 +76,22 @@ namespace pitta {
 			const Callable* func;
 		} rep;
 		std::string stringVal;
+	};
+
+	class PittaRuntimeException final : public std::runtime_error {
+	public:
+		std::string details;
+
+		const char* what()const noexcept override;
+
+		PittaRuntimeException(const std::string& detail);
+	};
+
+	class PittaReturn final : public std::runtime_error {
+	public:
+		Value value;
+
+		PittaReturn(Value value);
 	};
 
 }

@@ -173,6 +173,12 @@ case OpType:\
 		evaluate(stmt->expression);
 	}
 
+	void Interpreter::visitFunctionStmt(FunctionStmt<void, Value>* stmt){
+		ScriptCallable* function = new ScriptCallable(stmt, environment);
+		generatedCallables.emplace_back(function);
+		environment->define(stmt->name.lexeme, function);
+	}
+
 	void Interpreter::visitIfStmt(If<void, Value>* stmt) {
 		if (evaluate(stmt->condition).isTruthy())
 			execute(stmt->thenBranch);
@@ -183,6 +189,14 @@ case OpType:\
 	void Interpreter::visitPrintStmt(Print<void, Value>* stmt) {
 		Value val = evaluate(stmt->expression);
 		printf("%s\n", val.toString().c_str());
+	}
+	
+	void Interpreter::visitReturnStmt(Return<void, Value>* stmt) {
+		Value val;
+		if (stmt->value != nullptr)
+			val = evaluate(stmt->value);
+
+		throw new PittaReturn(val);
 	}
 
 	void Interpreter::visitVarStmt(Var<void, Value>* stmt) {

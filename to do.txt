@@ -1,0 +1,10 @@
+extra:
+do while loop
+annonymous functions
+annonymous functions in classes
+look into speeding up some of the code by replacing string maps at runtime
+
+actual:
+fix closure thing
+classes
+inheritance

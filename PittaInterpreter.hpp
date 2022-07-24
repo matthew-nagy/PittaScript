@@ -4,7 +4,7 @@
 #include "PittaRuntime.hpp"
 
 namespace pitta {
-	class Interpreter : public ExpressionVisitor<Value>, public StatementVisitor<void, Value> {
+	class Interpreter final : public ExpressionVisitor<Value>, public StatementVisitor<void, Value> {
 	public:
 
 		Value visitAssignExpr(Assign<Value>* expr);
@@ -29,9 +29,13 @@ namespace pitta {
 
 		void visitExpressionStmt(Expression<void, Value>* stmt);
 
+		void visitFunctionStmt(FunctionStmt<void, Value>* stmt);
+
 		void visitIfStmt(If<void, Value>* stmt);
 
 		void visitPrintStmt(Print<void, Value>* stmt);
+
+		void visitReturnStmt(Return<void, Value>* stmt);
 
 		void visitVarStmt(Var<void, Value>* stmt);
 
@@ -40,10 +44,15 @@ namespace pitta {
 		void interpret(Expr<Value>* expression);
 		void interpret(const std::vector<Stmt<void, Value>*>& statements);
 
+		void executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv);
+
 		Interpreter(Runtime* runtime);
 		Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals);
 	private:
 		Runtime* runtime;
+
+		//While running, callables could be made. We want to collect them all so we can delete them in the end
+		std::vector<Callable*> generatedCallables;
 
 		std::shared_ptr<Environment> globals;
 		std::shared_ptr<Environment> environment;
@@ -51,7 +60,5 @@ namespace pitta {
 		Value evaluate(Expr<Value>* expression);
 
 		void execute(Stmt<void, Value>* stmt);
-
-		void executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv);
 	};
 }

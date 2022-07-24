@@ -322,6 +322,7 @@ namespace pitta {
 			if (match(WHILE))return whileStatement();
 			if (match(FOR))return forStatement();
 			if (match(PRINT))return printStatement();
+			if (match(RETURN))return returnStatement();
 
 			return expressionStatement();
 		}
@@ -391,7 +392,7 @@ namespace pitta {
 			}
 			consume(RIGHT_PAREN, "Expect ')' after parameters.");
 			consume(LEFT_BRACE, "Expect '{' before " + functionKind + " body.");
-			std::vector<Stmt> body = block();
+			std::vector<Stmt<T, R>*> body = block();
 			return track(new FunctionStmt<T, R>(name, parameters, body));
 		}
 
@@ -413,6 +414,17 @@ namespace pitta {
 			Expr<R>* expr = expression();
 			consume(SEMICOLON, "Expect ';' after value");
 			return track(new Print<T, R>(expr));
+		}
+
+		Stmt<T, R>* returnStatement() {
+			Token keyword = previous();
+			Expr<R>* value = nullptr;
+			if (!check(SEMICOLON)) {
+				value = expression();
+			}
+
+			consume(SEMICOLON, "Expect ';' after return value.");
+			return track(new Return<T, R>(keyword, value));
 		}
 
 		Stmt<T, R>* varDeclaration() {
