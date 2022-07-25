@@ -3,6 +3,8 @@ do while loop
 annonymous functions
 annonymous functions in classes
 look into speeding up some of the code by replacing string maps at runtime
+^	on this, give blocks and such count of how many vars they have so they can make an environment of set vector size
+	rather than a hash of num
 
 actual:
 fix closure thing

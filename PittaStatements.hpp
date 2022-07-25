@@ -67,7 +67,10 @@ namespace pitta {
     public:
         Token name;
         std::vector<Token> params;
+        std::vector<uint16_t> paramIds;
         std::vector<Stmt<T, R>*> body;
+
+        uint16_t variableId;
 
         T accept(StatementVisitor<T, R>* visitor) {
             return visitor->visitFunctionStmt(this);
@@ -135,6 +138,8 @@ namespace pitta {
     public:
         Token name;
         Expr<R>* initializer;
+
+        uint16_t variableId;
 
         T accept(StatementVisitor<T, R>* visitor) {
             return visitor->visitVarStmt(this);

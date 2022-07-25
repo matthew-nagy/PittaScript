@@ -1,6 +1,7 @@
 #include "PittaParser.hpp"
 #include "PittaRuntime.hpp"
 #include "PittaInterpreter.hpp"
+#include "PittaResolver.hpp"
 #include <fstream>
 #include <sstream>
 
@@ -27,8 +28,11 @@ int main() {
 
 	pitta::Scanner scanner(buffer.str(), &runtime);
 	pitta::Parser<void, pitta::Value> parser(scanner.scanTokens(), &runtime);
+	auto tree = parser.parse();
+	pitta::Resolver r(&runtime);
+	r.sweepStatements(tree.statements);
 	pitta::Interpreter interpreter(&runtime);
-	interpreter.interpret(parser.parse().statements);
+	interpreter.interpret(tree.statements);
 
 	std::string a;
 	std::cout << "Ready to see the full power of cpp?";

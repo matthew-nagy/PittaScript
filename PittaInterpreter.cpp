@@ -6,7 +6,8 @@ namespace pitta {
 
 	Value Interpreter::visitAssignExpr(Assign<Value>* expr) {
 		Value value = evaluate(expr->value);
-		environment->assign(expr->name, value);
+		//environment->assign(expr->name, value);
+		environment->assign(expr->variableId, expr->environmentDepth, value);
 		return value;
 	}
 
@@ -151,7 +152,7 @@ case OpType:\
 	}
 
 	Value Interpreter::visitVariableExpr(Variable<Value>* expr) {
-		return environment->get(expr->name);
+		return environment->get(expr->variableId);
 	}
 
 	Value Interpreter::evaluate(Expr<Value>* expression) {
@@ -176,7 +177,7 @@ case OpType:\
 	void Interpreter::visitFunctionStmt(FunctionStmt<void, Value>* stmt){
 		ScriptCallable* function = new ScriptCallable(stmt, environment);
 		generatedCallables.emplace_back(function);
-		environment->define(stmt->name.lexeme, function);
+		environment->define(stmt->variableId, function);
 	}
 
 	void Interpreter::visitIfStmt(If<void, Value>* stmt) {
@@ -205,7 +206,7 @@ case OpType:\
 			value = evaluate(stmt->initializer);
 		}
 
-		environment->define(stmt->name.lexeme, value);
+		environment->define(stmt->variableId, value);
 	}
 
 	void Interpreter::visitWhileStmt(While<void, Value>* stmt) {

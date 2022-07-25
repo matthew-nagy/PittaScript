@@ -93,7 +93,25 @@ public:\
 	{}\
 }\
 
-	DoubleArgExp(Assign, Token, name, Expr<T>*, value, visitAssignExpr);
+
+	template<class T>
+	class Assign : public Expr<T> {
+	public:
+		Token name;
+		Expr<T>* value;
+
+		uint16_t environmentDepth;
+		uint16_t variableId;
+
+		T accept(ExpressionVisitor<T>* visitor)override {
+			return visitor->visitAssignExpr(this);
+		}
+		std::type_index getType()const override { return typeid(Assign); }
+		Assign(Token name, Expr<T>* value) :
+			name(name),
+			value(value)
+		{}
+	};
 
 	TripleArgExp(Binary, Expr<T>*, left, Token, op, Expr<T>*, right, visitBinaryExpr);
 
@@ -107,7 +125,22 @@ public:\
 
 	DoubleArgExp(Unary, Token, op, Expr<T>*, right, visitUnaryExpr);
 
-	SingleArgExp(Variable, Token, name, visitVariableExpr);
+	template<class T>
+	class Variable : public Expr<T> {
+	public:
+		Token name;
+
+		uint16_t environmentDepth;
+		uint16_t variableId;
+
+		T accept(ExpressionVisitor<T>* visitor)override {
+			return visitor->visitVariableExpr(this);
+		}
+		std::type_index getType()const override { return typeid(Variable); }
+		Variable(Token name) :
+			name(name)
+		{}
+	};
 
 
 	class ExprASTPrinter : public ExpressionVisitor<std::string> {
