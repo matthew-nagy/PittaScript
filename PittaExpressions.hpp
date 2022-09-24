@@ -131,7 +131,6 @@ public:\
 		Token name;
 
 		uint16_t environmentDepth;
-		uint16_t variableId;
 
 		T accept(ExpressionVisitor<T>* visitor)override {
 			return visitor->visitVariableExpr(this);

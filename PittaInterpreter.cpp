@@ -284,4 +284,9 @@ case OpType:\
 		environment = globals;
 	}
 
+
+	Runtime* Interpreter::getRuntime() {
+		return runtime;
+	}
+
 }

@@ -46,6 +46,8 @@ namespace pitta {
 
 		void executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv);
 
+		Runtime* getRuntime();
+
 		Interpreter(Runtime* runtime);
 		Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals);
 	private:
