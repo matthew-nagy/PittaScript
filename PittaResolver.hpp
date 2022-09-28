@@ -20,8 +20,14 @@ namespace pitta {
 		{}
 
 	private:
+		enum class FunctionType {
+			None,
+			Function
+		};
+
 		Interpreter* interpreter;
 		std::vector<std::unordered_map<std::string, bool>> scopes;
+		FunctionType currentFunction = FunctionType::None;
 
 
 		void resolve(std::vector<Stmt<void, Value>*>& statements) {
@@ -46,7 +52,10 @@ namespace pitta {
 			}
 		}
 
-		void resolveFunction(FunctionStmt<void, Value>* function) {
+		void resolveFunction(FunctionStmt<void, Value>* function, FunctionType type) {
+			FunctionType enclosingFunctionType = currentFunction;
+			currentFunction = type;
+
 			beginScope();
 			for (const Token& param : function->params) {
 				declare(param);
@@ -54,6 +63,8 @@ namespace pitta {
 			}
 			resolve(function->body);
 			endScope();
+
+			currentFunction = enclosingFunctionType;
 		}
 
 		void beginScope() {
@@ -68,11 +79,11 @@ namespace pitta {
 			if (!scopes.empty()) {
 				auto& currentScope = scopes.back();
 				if (currentScope.count(name.lexeme) > 0) {
-					interpreter->getRuntime()->runtimeError(
-						new PittaRuntimeException("Variable '" + name.lexeme + "' already declared in this scope")
+					interpreter->getRuntime()->error(name, 
+						"Variable '" + name.lexeme + "' already declared in this scope"
 					);
 				}
-				printf("Emplacing variable '%s', %d\n", name.lexeme.c_str(), name.line);
+
 				currentScope.emplace(name.lexeme, false);
 			}
 		}
@@ -80,7 +91,7 @@ namespace pitta {
 		void define(const Token& name) {
 			if (!scopes.empty()) {
 				auto& currentScope = scopes.back();
-				printf("Defining variable '%s', %d\n", name.lexeme.c_str(), name.line);
+
 				currentScope.at(name.lexeme) = true;
 			}
 		}
@@ -126,13 +137,14 @@ namespace pitta {
 
 		Value visitVariableExpr(Variable<Value>* expr) {
 			if (!scopes.empty()) {
-				/*auto& currentScope = scopes.back();
-				if (currentScope.at(expr->name.lexeme) == false) {
-					interpreter->getRuntime()->runtimeError(new PittaRuntimeException(
-						"Can't read local variable in its own initiliser. Variable '" + expr->name.lexeme + "' On line " + std::to_string(expr->name.line)
-					));
-					throw 'a';
-				}*/
+				auto& currentScope = scopes.back();
+				if (currentScope.count(expr->name.lexeme) > 0) {
+					if (currentScope.at(expr->name.lexeme) == false) {
+						interpreter->getRuntime()->error(expr->name,
+							"Can't read local variable in its own initiliser. Variable '" + expr->name.lexeme + "' On line " + std::to_string(expr->name.line)
+						);
+					}
+				}
 			}
 
 			resolveLocal(expr, expr->name);
@@ -147,6 +159,11 @@ namespace pitta {
 			endScope();
 		}
 
+		void visitClassStmt(ClassStmt<void, Value>* stmt)override {
+			declare(stmt->name);
+			define(stmt->name);
+		}
+
 		void visitExpressionStmt(Expression<void, Value>* stmt) {
 			resolve(stmt->expression);
 		}
@@ -155,7 +172,7 @@ namespace pitta {
 			declare(stmt->name);
 			define(stmt->name);
 
-			resolveFunction(stmt);
+			resolveFunction(stmt, FunctionType::Function);
 		}
 
 		void visitIfStmt(If<void, Value>* stmt) {
@@ -170,6 +187,9 @@ namespace pitta {
 		}
 
 		void visitReturnStmt(Return<void, Value>* stmt) {
+			if (currentFunction == FunctionType::None) {
+				interpreter->getRuntime()->error(stmt->keyword, "Can't return from top level code");
+			}
 			if (stmt->value != nullptr)
 				resolve(stmt->value);
 		}

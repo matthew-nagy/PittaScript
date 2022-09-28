@@ -1,6 +1,7 @@
 #include "PittaInterpreter.hpp"
 #include "PittaRuntime.hpp"
 #include "PittaFunction.hpp"
+#include "PittaClass.hpp"
 
 namespace pitta {
 
@@ -177,6 +178,12 @@ case OpType:\
 
 	void Interpreter::visitBlockStmt(Block<void, Value>* stmt) {
 		executeBlock(stmt->statements, std::make_shared<Environment>(environment));
+	}
+
+	void Interpreter::visitClassStmt(ClassStmt<void, Value>* stmt) {
+		environment->define(stmt->name, Null);
+		Class* classDefinition = new Class(stmt->name.lexeme);
+		environment->assign(stmt->name, classDefinition);
 	}
 
 	void Interpreter::visitExpressionStmt(Expression<void, Value>* stmt) {

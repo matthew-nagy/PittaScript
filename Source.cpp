@@ -20,13 +20,13 @@ int main() {
 
 	pitta::Runtime runtime;
 	{
-		pitta::Parser<std::string, std::string> printParse(pitta::Scanner(buffer.str(), &runtime).scanTokens(), &runtime);
+		/*pitta::Parser<std::string, std::string> printParse(pitta::Scanner(buffer.str(), &runtime).scanTokens(), &runtime);
 		auto stringParse = printParse.parse();
 		pitta::StmtASTPrinter astP;
 		printf("\n\n\n");
 		for (auto& statement : stringParse.statements)
 			printf("%s\n", statement->accept(&astP).c_str());
-		printf("\n\n\n");
+		printf("\n\n\n");*/
 	}
 
 	pitta::Scanner scanner(buffer.str(), &runtime);
@@ -35,7 +35,13 @@ int main() {
 	pitta::Interpreter interpreter(&runtime);
 	pitta::Resolver r(&interpreter);
 	r.sweepStatements(tree.statements);
-	interpreter.interpret(tree.statements);
+
+	if (!runtime.hadError) {
+		interpreter.interpret(tree.statements);
+	}
+	else {
+		printf("There was an error, cannot run!\n");
+	}
 
 	std::string a;
 	std::cout << "Ready to see the full power of cpp?";

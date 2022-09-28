@@ -30,6 +30,8 @@ namespace pitta {
 		
 		void visitBlockStmt(Block<void, Value>* stmt);
 
+		void visitClassStmt(ClassStmt<void, Value>* stmt);
+
 		void visitExpressionStmt(Expression<void, Value>* stmt);
 
 		void visitFunctionStmt(FunctionStmt<void, Value>* stmt);

@@ -284,7 +284,7 @@ namespace pitta {
 		Expr<R>* primary() {
 			if (match(FALSE)) return track(new Literal<R>(false));
 			if (match(TRUE)) return track(new Literal<R>(true));
-			if (match(NIL)) return track(new Literal<R>((void*)nullptr));
+			if (match(NIL)) return track(new Literal<R>(NIL));
 			if (match(UNDEFINED)) return track(new Literal<R>(Undefined));
 			if (match(IDENTIFIER)) return track(new Variable<R>(previous()));
 
@@ -304,6 +304,8 @@ namespace pitta {
 
 		Stmt<T, R>* declaration() {
 			try {
+				if (match(CLASS))
+					return classDeclaration();
 				if (match(VAR))
 					return varDeclaration();
 				if (match(FUNC))
@@ -311,6 +313,8 @@ namespace pitta {
 				return statement();
 			}
 			catch (PittaRuntimeException* error) {
+				printf("Caught runtime error %s\n", error->details.c_str());
+
 				synchronize();
 				return nullptr;
 			}
@@ -335,6 +339,20 @@ namespace pitta {
 
 			consume(RIGHT_BRACE, "Expect '}' after block.");
 			return statements;
+		}
+
+		Stmt<T, R>* classDeclaration() {
+			Token name = consume(IDENTIFIER, "Expected a class name");
+			consume(LEFT_BRACE, "Expect '{' before class body");
+
+			std::vector<FunctionStmt<T, R>*> methods;
+			while (!check(RIGHT_BRACE) && !isAtEnd()) {
+				methods.emplace_back((FunctionStmt<T, R>*)function("method"));
+			}
+
+			consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+			return track(new ClassStmt<T, R>(name, methods));
 		}
 
 		Stmt<T, R>* expressionStatement() {

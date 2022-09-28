@@ -92,7 +92,7 @@ namespace pitta {
 				scanToken();
 			}
 
-			tokens.emplace_back(END_OF_FILE, "", line, nullptr);
+			tokens.emplace_back(END_OF_FILE, "", line, NIL);
 
 			return tokens;
 		}

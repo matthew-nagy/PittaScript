@@ -4,6 +4,7 @@
 namespace pitta {
 
     template<class T, class R>class Block;
+    template<class T, class R>class ClassStmt;
     template<class T, class R>class Expression;
     template<class T, class R>class FunctionStmt;
     template<class T, class R> class If;
@@ -16,7 +17,7 @@ namespace pitta {
 	class StatementVisitor {
     public:
         virtual T visitBlockStmt(Block<T, R>* stmt) = 0;
-        //virtual T visitClassStmt(Class<T, R>* stmt) = 0;
+        virtual T visitClassStmt(ClassStmt<T, R>* stmt) = 0;
         virtual T visitExpressionStmt(Expression<T, R>* stmt) = 0;
         virtual T visitFunctionStmt(FunctionStmt<T, R>* stmt) = 0;
         virtual T visitIfStmt(If<T, R>* stmt) = 0;
@@ -45,6 +46,22 @@ namespace pitta {
             statements(statements)
         {}
 
+    };
+
+    template<class T, class R>
+    class ClassStmt : public Stmt<T, R> {
+    public:
+        Token name;
+        std::vector<FunctionStmt<T, R>*> methods;
+
+        T accept(StatementVisitor<T, R>* visitor) {
+            return visitor->visitClassStmt(this);
+        }
+
+        ClassStmt(const Token& name, std::vector<FunctionStmt<T, R>*>& methods):
+            name(name),
+            methods(methods)
+        {}
     };
 
     template<class T, class R>
@@ -179,7 +196,9 @@ namespace pitta {
             ret += "\n" + getTabbedOut() = ">";
             return ret;
         }
-        //std::string visitClassStmt(Class<std::string, std::string>* stmt) = 0;
+        std::string visitClassStmt(ClassStmt<std::string, std::string>* stmt) {
+            return "Class: " + stmt->name.lexeme;
+        }
         std::string visitExpressionStmt(Expression<std::string, std::string>* stmt) {
             return getTabbedOut() + "<expr : " + stmt->expression->accept(&exprPrinter) + " >";
         }

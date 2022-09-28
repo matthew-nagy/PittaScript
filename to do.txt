@@ -1,12 +1,13 @@
 extra:
 do while loop
-annonymous functions
-annonymous functions in classes
+annonymous functions / lambdas
+annonymous functions in classes	
+add break statement (similer to how return works), and add force no break outside a loop in the resolver
 look into speeding up some of the code by replacing string maps at runtime
 ^	on this, give blocks and such count of how many vars they have so they can make an environment of set vector size
 	rather than a hash of num
 
 actual:
-fix closure thing
+fix closure thing	_/
 classes
 inheritance

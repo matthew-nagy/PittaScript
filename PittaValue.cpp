@@ -1,5 +1,6 @@
 #include "PittaValue.hpp"
 #include "PittaFunction.hpp"
+#include "PittaClass.hpp"
 
 #define basic_numerics \
 switch (type) {\
@@ -60,7 +61,7 @@ namespace pitta {
 		//Int, Float, String, Bool, Null, Undefined, Instance, Class, Function
 #define TS(type) { type, #type }
 	const std::unordered_map<Type, std::string> c_typeToString = {
-		TS(Int), TS(Float), TS(String), TS(Bool), TS(Null), TS(Undefined), TS(Instance), TS(Class), TS(Function)
+		TS(Int), TS(Float), TS(String), TS(Bool), TS(Null), TS(Undefined), TS(Instance), TS(ClassDef), TS(Function)
 	};
 #undef TS
 
@@ -118,6 +119,8 @@ namespace pitta {
 				return stringVal;
 		case Function:
 			return "Function " + rep.func->getName() + " with arity " + std::to_string(rep.func->getArity());
+		case ClassDef:
+			return rep.classDef->asString();
 		case Null:
 			return "Null";
 		case Undefined:
@@ -149,6 +152,10 @@ namespace pitta {
 		if (type == Function)
 			return rep.func;
 		throw new PittaRuntimeException("No function conversion acceptable");
+	}
+
+	const Class* Value::asClass()const {
+		return rep.classDef;
 	}
 
 	void Value::setInt(int value) {
@@ -194,6 +201,12 @@ namespace pitta {
 			throw new PittaRuntimeException("Cannot assign a non-function, null or undefined value to a function");
 		type = Function;
 		rep.func = callable;
+	}
+	void Value::setClass(const Class* classDef) {
+		if (!(type == Null || type == Undefined))
+			throw new PittaRuntimeException("Cannot assign a class to a non null or undefined value");
+		type = ClassDef;
+		rep.classDef = classDef;
 	}
 	void Value::setNull() {
 		if (isBoundValue()) {
@@ -272,6 +285,10 @@ namespace pitta {
 		else
 			setCallable(callable);
 		return *this;
+	}	
+	Value& Value::operator=(const Class* classDef) {
+		setClass(classDef);
+		return *this;
 	}
 	Value& Value::operator=(Type) {
 		setUndefined();
@@ -303,6 +320,14 @@ namespace pitta {
 		return false;
 	}
 
+	Value::Value(Type t) {
+		if (t == Null || t == Undefined) {
+			type = t;
+		}
+		else {
+			throw - 1;
+		}
+	}
 	Value::Value(int val) {
 		setInt(val);
 	}
@@ -329,6 +354,9 @@ namespace pitta {
 	}
 	Value::Value(const Callable* callable) {
 		setCallable(callable);
+	}
+	Value::Value(const Class* classDef) {
+		setClass(classDef);
 	}
 
 }
