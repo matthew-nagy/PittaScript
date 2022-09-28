@@ -58,7 +58,7 @@ namespace pitta {
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override {
 			std::shared_ptr<Environment> environment = std::make_shared<Environment>(closure);
 			for (size_t i = 0; i < arguments.size(); i++)
-				environment->define(declaration->paramIds[i], arguments[i]);
+				environment->define(declaration->params[i], arguments[i]);
 
 			Value toReturn;
 

@@ -20,18 +20,21 @@ int main() {
 
 	pitta::Runtime runtime;
 	{
-		pitta::Scanner scanner(buffer.str(), &runtime);
-		auto tokens = scanner.scanTokens();
-		for (pitta::Token& t : tokens)
-			printf("%s\n", t.toString().c_str());
+		pitta::Parser<std::string, std::string> printParse(pitta::Scanner(buffer.str(), &runtime).scanTokens(), &runtime);
+		auto stringParse = printParse.parse();
+		pitta::StmtASTPrinter astP;
+		printf("\n\n\n");
+		for (auto& statement : stringParse.statements)
+			printf("%s\n", statement->accept(&astP).c_str());
+		printf("\n\n\n");
 	}
 
 	pitta::Scanner scanner(buffer.str(), &runtime);
 	pitta::Parser<void, pitta::Value> parser(scanner.scanTokens(), &runtime);
 	auto tree = parser.parse();
-	pitta::Resolver r(&runtime);
-	r.sweepStatements(tree.statements);
 	pitta::Interpreter interpreter(&runtime);
+	pitta::Resolver r(&interpreter);
+	r.sweepStatements(tree.statements);
 	interpreter.interpret(tree.statements);
 
 	std::string a;

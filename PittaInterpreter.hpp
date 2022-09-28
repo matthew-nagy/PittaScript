@@ -4,7 +4,10 @@
 #include "PittaRuntime.hpp"
 
 namespace pitta {
+	class Resolver;
+
 	class Interpreter final : public ExpressionVisitor<Value>, public StatementVisitor<void, Value> {
+		friend class Resolver;
 	public:
 
 		Value visitAssignExpr(Assign<Value>* expr);
@@ -58,9 +61,14 @@ namespace pitta {
 
 		std::shared_ptr<Environment> globals;
 		std::shared_ptr<Environment> environment;
+		std::unordered_map<Expr<Value>*, int> locals;
 
 		Value evaluate(Expr<Value>* expression);
 
 		void execute(Stmt<void, Value>* stmt);
+
+		void resolve(Expr<Value>* expression, int depth);
+
+		Value lookUpVariable(const Token& name, Expr<Value>* expr);
 	};
 }

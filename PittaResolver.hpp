@@ -67,6 +67,12 @@ namespace pitta {
 		void declare(const Token& name) {
 			if (!scopes.empty()) {
 				auto& currentScope = scopes.back();
+				if (currentScope.count(name.lexeme) > 0) {
+					interpreter->getRuntime()->runtimeError(
+						new PittaRuntimeException("Variable '" + name.lexeme + "' already declared in this scope")
+					);
+				}
+				printf("Emplacing variable '%s', %d\n", name.lexeme.c_str(), name.line);
 				currentScope.emplace(name.lexeme, false);
 			}
 		}
@@ -74,35 +80,59 @@ namespace pitta {
 		void define(const Token& name) {
 			if (!scopes.empty()) {
 				auto& currentScope = scopes.back();
-				currentScope.emplace(name.lexeme, true);
+				printf("Defining variable '%s', %d\n", name.lexeme.c_str(), name.line);
+				currentScope.at(name.lexeme) = true;
 			}
 		}
 
 		Value visitAssignExpr(Assign<Value>* expr) {
 			resolve(expr->value);
 			resolveLocal(expr, expr->name);
+			return 0;
 		}
 
-		Value visitBinaryExpr(Binary<Value>* expr);
+		Value visitBinaryExpr(Binary<Value>* expr) {
+			resolve(expr->left);
+			resolve(expr->right);
+			return 0;
+		}
 
-		Value visitCallExpr(Call<Value>* expr);
+		Value visitCallExpr(Call<Value>* expr) {
+			resolve(expr->callee);
+			for (auto& arg : expr->arguments)
+				resolve(arg);
+			return 0;
+		}
 
-		Value visitGroupingExpr(Grouping<Value>* expr);
+		Value visitGroupingExpr(Grouping<Value>* expr) {
+			resolve(expr->expression);
+			return 0;
+		}
 
-		Value visitLiteralExpr(Literal<Value>* expr);
+		Value visitLiteralExpr(Literal<Value>* expr){
+			return 0;
+		}
 
-		Value visitLogicalExpr(Logical<Value>* expr);
+		Value visitLogicalExpr(Logical<Value>* expr) {
+			resolve(expr->left);
+			resolve(expr->right);
+			return 0;
+		}
 
-		Value visitUnaryExpr(Unary<Value>* expr);
+		Value visitUnaryExpr(Unary<Value>* expr) {
+			resolve(expr->right);
+			return 0;
+		}
 
 		Value visitVariableExpr(Variable<Value>* expr) {
 			if (!scopes.empty()) {
-				auto& currentScope = scopes.back();
+				/*auto& currentScope = scopes.back();
 				if (currentScope.at(expr->name.lexeme) == false) {
 					interpreter->getRuntime()->runtimeError(new PittaRuntimeException(
-						"Can't read local variable in its own initiliser."
+						"Can't read local variable in its own initiliser. Variable '" + expr->name.lexeme + "' On line " + std::to_string(expr->name.line)
 					));
-				}
+					throw 'a';
+				}*/
 			}
 
 			resolveLocal(expr, expr->name);
@@ -117,7 +147,9 @@ namespace pitta {
 			endScope();
 		}
 
-		void visitExpressionStmt(Expression<void, Value>* stmt);
+		void visitExpressionStmt(Expression<void, Value>* stmt) {
+			resolve(stmt->expression);
+		}
 
 		void visitFunctionStmt(FunctionStmt<void, Value>* stmt) {
 			declare(stmt->name);
@@ -126,11 +158,21 @@ namespace pitta {
 			resolveFunction(stmt);
 		}
 
-		void visitIfStmt(If<void, Value>* stmt);
+		void visitIfStmt(If<void, Value>* stmt) {
+			resolve(stmt->condition);
+			resolve(stmt->thenBranch);
+			if (stmt->elseBranch != nullptr)
+				resolve(stmt->elseBranch);
+		}
 
-		void visitPrintStmt(Print<void, Value>* stmt);
+		void visitPrintStmt(Print<void, Value>* stmt) {
+			resolve(stmt->expression);
+		}
 
-		void visitReturnStmt(Return<void, Value>* stmt);
+		void visitReturnStmt(Return<void, Value>* stmt) {
+			if (stmt->value != nullptr)
+				resolve(stmt->value);
+		}
 
 		void visitVarStmt(Var<void, Value>* stmt) override {
 			declare(stmt->name);
@@ -140,7 +182,10 @@ namespace pitta {
 			define(stmt->name);
 		}
 
-		void visitWhileStmt(While<void, Value>* stmt)override;
+		void visitWhileStmt(While<void, Value>* stmt)override {
+			resolve(stmt->condition);
+			resolve(stmt->body);
+		}
 	};
 
 }

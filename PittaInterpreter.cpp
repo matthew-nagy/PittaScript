@@ -6,8 +6,17 @@ namespace pitta {
 
 	Value Interpreter::visitAssignExpr(Assign<Value>* expr) {
 		Value value = evaluate(expr->value);
-		//environment->assign(expr->name, value);
-		environment->assign(expr->variableId, expr->environmentDepth, value);
+
+		auto strval = value.toString();
+
+		if (locals.count(expr) == 0) {
+			globals->assign(expr->name, value);
+		}
+		else {
+			int distance = locals.at(expr);
+			environment->assignAt(distance, expr->name, value);
+		}
+
 		return value;
 	}
 
@@ -152,7 +161,7 @@ case OpType:\
 	}
 
 	Value Interpreter::visitVariableExpr(Variable<Value>* expr) {
-		return environment->get(expr->variableId);
+		return lookUpVariable(expr->name, expr);
 	}
 
 	Value Interpreter::evaluate(Expr<Value>* expression) {
@@ -177,7 +186,7 @@ case OpType:\
 	void Interpreter::visitFunctionStmt(FunctionStmt<void, Value>* stmt){
 		ScriptCallable* function = new ScriptCallable(stmt, environment);
 		generatedCallables.emplace_back(function);
-		environment->define(stmt->variableId, function);
+		environment->define(stmt->name, function);
 	}
 
 	void Interpreter::visitIfStmt(If<void, Value>* stmt) {
@@ -206,7 +215,7 @@ case OpType:\
 			value = evaluate(stmt->initializer);
 		}
 
-		environment->define(stmt->variableId, value);
+		environment->define(stmt->name, value);
 	}
 
 	void Interpreter::visitWhileStmt(While<void, Value>* stmt) {
@@ -287,6 +296,20 @@ case OpType:\
 
 	Runtime* Interpreter::getRuntime() {
 		return runtime;
+	}
+
+	void Interpreter::resolve(Expr<Value>* expression, int depth) {
+		locals.emplace(expression, depth);
+	}
+
+	Value Interpreter::lookUpVariable(const Token& name, Expr<Value>* expr) {
+		if (locals.count(expr) == 0) {
+			return globals->get(name);
+		}
+		else {
+			int distance = locals.at(expr);
+			return environment->getAt(distance, name.lexeme);
+		}
 	}
 
 }

@@ -113,7 +113,24 @@ public:\
 		{}
 	};
 
-	TripleArgExp(Binary, Expr<T>*, left, Token, op, Expr<T>*, right, visitBinaryExpr);
+	template<class T>
+	class Binary : public Expr<T> {
+	public:
+		Expr<T>* left;
+		Token op;
+		Expr<T>* right;
+		T accept(ExpressionVisitor<T>* visitor)override {
+			return visitor->visitBinaryExpr(this);
+		}
+		std::type_index getType()const override {
+			return typeid(Binary);
+		}
+		Binary(Expr<T>* left, Token op, Expr<T>* right) :
+			left(left),
+			op(op),
+			right(right)
+		{}
+	};
 
 	TripleArgExp(Call, Expr<T>*, callee, Token, closingParenthesis, std::vector<Expr<T>*>, arguments, visitCallExpr);
 
