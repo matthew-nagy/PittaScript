@@ -1,20 +1,31 @@
 #pragma once
 #include <vector>
 #include "PittaValue.hpp"
+#include "PittaFunction.hpp"
+#include "PittaInterpreter.hpp"
 
 namespace pitta {
 
-	class Class {
+	class Class : public Callable{
 	public:
 		const std::string name;
 
-		std::string asString()const {
-			return name;
-		}
+		std::string asString()const;
 
-		Class(const std::string& name) :
-			name(name)
-		{}
+		int getArity()const override;
+
+		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override;
+
+		Class(const std::string& name);
 	};
+	
+	class Instance {
+	public:
 
+		std::string asString()const;
+
+		Instance(Class const* definition);
+	private:
+		Class const*const classDefinition;
+	};
 }

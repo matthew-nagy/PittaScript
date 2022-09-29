@@ -6,13 +6,14 @@
 namespace pitta {
 
 	enum Type {
-		Int, Float, String, Bool, Null, Undefined, Instance, ClassDef, Function
+		Int, Float, String, Bool, Null, Undefined, ClassInstance, ClassDef, Function
 	};
 
 	extern const std::unordered_map<Type, std::string> c_typeToString;
 
 	class Callable;
 	class Class;
+	class Instance;
 
 	std::string getSubstring(const std::string& from, int startIndex, int endIndex);
 
@@ -31,6 +32,7 @@ namespace pitta {
 		std::string asString()const;
 		const Callable* asCallable()const;
 		const Class* asClass()const;
+		const Instance* asInstance()const;
 
 		void setInt(int value);
 		void setFloat(float value);
@@ -38,6 +40,7 @@ namespace pitta {
 		void setString(const std::string& value);
 		void setCallable(const Callable* callable);
 		void setClass(const Class* classDef);
+		void setInstance(const Instance* instance);
 		void setNull();
 		void setUndefined();
 
@@ -53,6 +56,7 @@ namespace pitta {
 		Value& operator=(const std::string& value);
 		Value& operator=(const Callable* callable);
 		Value& operator=(const Class* classDef);
+		Value& operator=(const Instance* instance);
 		Value& operator=(Type);
 
 		bool operator==(const Value& right)const;
@@ -69,6 +73,7 @@ namespace pitta {
 		Value(std::string* val);
 		Value(const Callable* callable);
 		Value(const Class* classDef);
+		Value(const Instance* instance);
 
 	private:
 		Type type = Undefined;
@@ -81,6 +86,7 @@ namespace pitta {
 			std::string* stringValP;
 			const Callable* func;
 			const Class* classDef;
+			const Instance* instance;
 		} rep;
 		std::string stringVal;
 	};

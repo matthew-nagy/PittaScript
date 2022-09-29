@@ -29,7 +29,7 @@ namespace pitta {
 		virtual T visitVariableExpr(Variable<T>* expr) = 0;
 		virtual T visitLogicalExpr(Logical<T>* expr) = 0;
 		virtual T visitCallExpr(Call<T>* expr) = 0;
-		//virtual T visitGetExpr(Get<T>* expr) = 0;
+		virtual T visitGetExpr(Get<T>* expr) = 0;
 		//virtual T visitSetExpr(Set<T>* expr) = 0;
 		//virtual T visitThisExpr(This<T>* expr) = 0;
 		//virtual T visitSuperExpr(Super<T>* expr) = 0;
@@ -134,6 +134,8 @@ public:\
 
 	TripleArgExp(Call, Expr<T>*, callee, Token, closingParenthesis, std::vector<Expr<T>*>, arguments, visitCallExpr);
 
+	DoubleArgExp(Get, Expr<T>*, object, Token, name);
+
 	SingleArgExp(Grouping, Expr<T>*, expression, visitGroupingExpr);
 
 	SingleArgExp(Literal, Value, value, visitLiteralExpr);
@@ -180,6 +182,13 @@ public:\
 			for (Expr<std::string>* arg : expr->arguments)
 				ret += arg->accept(this) + ", ";
 			return ret.substr(0, ret.size() - 2) + ") )";
+		}
+
+		std::string visitGetExpr(Get<std::string>* expr) {
+			throw 0;
+			//TODO
+			const std::string ret = "";
+			return ret;
 		}
 
 		std::string visitGroupingExpr(Grouping<std::string>* expr) {

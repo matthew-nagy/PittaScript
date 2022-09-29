@@ -284,7 +284,7 @@ namespace pitta {
 		Expr<R>* primary() {
 			if (match(FALSE)) return track(new Literal<R>(false));
 			if (match(TRUE)) return track(new Literal<R>(true));
-			if (match(NIL)) return track(new Literal<R>(NIL));
+			if (match(NIL)) return track(new Literal<R>(Null));
 			if (match(UNDEFINED)) return track(new Literal<R>(Undefined));
 			if (match(IDENTIFIER)) return track(new Variable<R>(previous()));
 

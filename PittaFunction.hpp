@@ -11,7 +11,7 @@ namespace pitta {
 	class Callable {
 	public:
 
-		int getArity()const {
+		virtual int getArity()const {
 			return arity;
 		}
 

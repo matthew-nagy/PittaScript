@@ -5,6 +5,8 @@
 
 namespace pitta {
 	class Resolver;
+	class Class;
+	class Instance;
 
 	class Interpreter final : public ExpressionVisitor<Value>, public StatementVisitor<void, Value> {
 		friend class Resolver;
@@ -53,13 +55,18 @@ namespace pitta {
 
 		Runtime* getRuntime();
 
+		void registerNewInstance(Instance* newInstance);
+
 		Interpreter(Runtime* runtime);
 		Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals);
+		~Interpreter();
 	private:
 		Runtime* runtime;
 
-		//While running, callables could be made. We want to collect them all so we can delete them in the end
+		//While running, thiiings could be made. We want to collect them all so we can delete them in the end
 		std::vector<Callable*> generatedCallables;
+		std::vector<Class*> generatedClasses;
+		std::vector<Instance*> generatedInstances;
 
 		std::shared_ptr<Environment> globals;
 		std::shared_ptr<Environment> environment;

@@ -98,7 +98,7 @@ case OpType:\
 		for (Expr<Value>* arg : expr->arguments)
 			arguments.emplace_back(evaluate(arg));
 
-		if (callee.getType() != Function) {
+		if (callee.getType() != Function && callee.getType() != ClassDef) {
 			runtime->error(expr->closingParenthesis, "Can only call functions and classes.");
 			throw new PittaRuntimeException("Can only call functions and classes.");
 		}
@@ -183,6 +183,7 @@ case OpType:\
 	void Interpreter::visitClassStmt(ClassStmt<void, Value>* stmt) {
 		environment->define(stmt->name, Null);
 		Class* classDefinition = new Class(stmt->name.lexeme);
+		generatedClasses.emplace_back(classDefinition);
 		environment->assign(stmt->name, classDefinition);
 	}
 
@@ -300,6 +301,15 @@ case OpType:\
 		environment = globals;
 	}
 
+	Interpreter::~Interpreter() {
+		for (auto genFunc : generatedCallables)
+			delete genFunc;
+		for (auto genClass : generatedClasses)
+			delete genClass;
+		for (auto genInstance : generatedInstances)
+			delete genInstance;
+	}
+
 
 	Runtime* Interpreter::getRuntime() {
 		return runtime;
@@ -317,6 +327,10 @@ case OpType:\
 			int distance = locals.at(expr);
 			return environment->getAt(distance, name.lexeme);
 		}
+	}
+
+	void Interpreter::registerNewInstance(Instance* newInstance) {
+		generatedInstances.emplace_back(newInstance);
 	}
 
 }

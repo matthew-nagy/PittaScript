@@ -58,10 +58,10 @@ namespace pitta {
 
 
 
-		//Int, Float, String, Bool, Null, Undefined, Instance, Class, Function
+		//Int, Float, String, Bool, Null, Undefined, ClassInstance, ClassDef, Function
 #define TS(type) { type, #type }
 	const std::unordered_map<Type, std::string> c_typeToString = {
-		TS(Int), TS(Float), TS(String), TS(Bool), TS(Null), TS(Undefined), TS(Instance), TS(ClassDef), TS(Function)
+		TS(Int), TS(Float), TS(String), TS(Bool), TS(Null), TS(Undefined), TS(ClassInstance), TS(ClassDef), TS(Function)
 	};
 #undef TS
 
@@ -121,6 +121,8 @@ namespace pitta {
 			return "Function " + rep.func->getName() + " with arity " + std::to_string(rep.func->getArity());
 		case ClassDef:
 			return rep.classDef->asString();
+		case ClassInstance:
+			return rep.instance->asString();
 		case Null:
 			return "Null";
 		case Undefined:
@@ -151,11 +153,17 @@ namespace pitta {
 	const Callable* Value::asCallable()const {
 		if (type == Function)
 			return rep.func;
+		else if (type == ClassDef)
+			return rep.classDef;
 		throw new PittaRuntimeException("No function conversion acceptable");
 	}
 
 	const Class* Value::asClass()const {
 		return rep.classDef;
+	}
+
+	const Instance* Value::asInstance()const {
+		return rep.instance;
 	}
 
 	void Value::setInt(int value) {
@@ -208,6 +216,12 @@ namespace pitta {
 		type = ClassDef;
 		rep.classDef = classDef;
 	}
+	void Value::setInstance(const Instance* instance) {
+		if (!(type == Null || type == Undefined))
+			throw new PittaRuntimeException("Cannot assign an instance of a class to a non null or undefined value");
+		type = ClassInstance;
+		rep.instance = instance;
+	}
 	void Value::setNull() {
 		if (isBoundValue()) {
 			throw new PittaRuntimeException("Cannot set a bound value to null");
@@ -252,6 +266,15 @@ namespace pitta {
 		case String:
 			setString(right.asString());
 			break;
+		case Function:
+			setCallable(right.asCallable());
+			break;
+		case ClassDef:
+			setClass(right.asClass());
+			break;
+		case ClassInstance:
+			setInstance(right.asInstance());
+			break;
 		case Null:
 			setNull();
 			break;
@@ -290,8 +313,17 @@ namespace pitta {
 		setClass(classDef);
 		return *this;
 	}
-	Value& Value::operator=(Type) {
-		setUndefined();
+	Value& Value::operator=(const Instance* instance) {
+		setInstance(instance);
+		return *this;
+	}
+	Value& Value::operator=(Type type) {
+		if (type == Undefined)
+			setUndefined();
+		else if (type == Null)
+			setNull();
+		else
+			throw(0);
 		return *this;
 	}
 
@@ -357,6 +389,9 @@ namespace pitta {
 	}
 	Value::Value(const Class* classDef) {
 		setClass(classDef);
+	}
+	Value::Value(const Instance* instance) {
+		setInstance(instance);
 	}
 
 }

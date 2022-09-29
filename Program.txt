@@ -8,6 +8,12 @@ for(var i = 0; i < 5; i = i + 1){
 	}
 }
 
+class TestClass{}
+
+var testOfClasses = TestClass();
+
+print testOfClasses;
+
 print "Loop test over";
 print "Heccin fibbonaccii numbers lets go";
 
