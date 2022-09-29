@@ -134,7 +134,7 @@ public:\
 
 	TripleArgExp(Call, Expr<T>*, callee, Token, closingParenthesis, std::vector<Expr<T>*>, arguments, visitCallExpr);
 
-	DoubleArgExp(Get, Expr<T>*, object, Token, name);
+	DoubleArgExp(Get, Expr<T>*, object, Token, name, visitGetExpr);
 
 	SingleArgExp(Grouping, Expr<T>*, expression, visitGroupingExpr);
 

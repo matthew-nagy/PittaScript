@@ -114,6 +114,11 @@ case OpType:\
 		return (*callee.asCallable())(this, arguments);
 	}
 
+	Value Interpreter::visitGetExpr(Get<Value>* expr) {
+		//TODO
+		return Null;
+	}
+
 	Value Interpreter::visitGroupingExpr(Grouping<Value>* expr) {
 		return evaluate(expr->expression);
 	}

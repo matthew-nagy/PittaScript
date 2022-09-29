@@ -115,6 +115,11 @@ namespace pitta {
 			return 0;
 		}
 
+		Value visitGetExpr(Get<Value>* expr) {
+			//TODO
+			return Null;
+		}
+
 		Value visitGroupingExpr(Grouping<Value>* expr) {
 			resolve(expr->expression);
 			return 0;

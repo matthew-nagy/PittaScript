@@ -14,6 +14,10 @@ int fib(int n) {
 
 int main() {
 
+	std::cout << sizeof(pitta::Value) << std::endl;
+	std::cout << sizeof(std::string) << std::endl;
+	std::cout << sizeof(std::unique_ptr<std::string>) << std::endl;
+
 	std::stringstream buffer;
 	std::ifstream file("Program.txt");
 	buffer << file.rdbuf();

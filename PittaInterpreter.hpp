@@ -18,6 +18,8 @@ namespace pitta {
 
 		Value visitCallExpr(Call<Value>* expr);
 
+		Value visitGetExpr(Get<Value>* expr);
+
 		Value visitGroupingExpr(Grouping<Value>* expr);
 
 		Value visitLiteralExpr(Literal<Value>* expr);
