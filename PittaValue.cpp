@@ -116,7 +116,7 @@ namespace pitta {
 			if (isBoundValue())
 				return *rep.stringValP;
 			else
-				return stringVal;
+				return *stringVal;
 		case Function:
 			return "Function " + rep.func->getName() + " with arity " + std::to_string(rep.func->getArity());
 		case ClassDef:
@@ -146,7 +146,7 @@ namespace pitta {
 		if (type == String) {
 			if (isBoundValue())
 				return *rep.stringValP;
-			return stringVal;
+			return *stringVal;
 		}
 		throw new PittaRuntimeException("No string conversion acceptable");
 	}
@@ -201,7 +201,7 @@ namespace pitta {
 		}
 		else {
 			type = String;
-			stringVal = value;
+			*stringVal = value;
 		}
 	}
 	void Value::setCallable(const Callable* callable) {
@@ -392,6 +392,13 @@ namespace pitta {
 	}
 	Value::Value(const Instance* instance) {
 		setInstance(instance);
+	}
+	Value::Value(const Value& value) {
+		rep = value.rep;
+		type = value.type;
+		isBoundPointer = value.isBoundPointer;
+		if (type == String && !isBoundPointer)
+			*stringVal == *value.stringVal;
 	}
 
 }

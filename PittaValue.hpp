@@ -2,10 +2,11 @@
 #include <string>
 #include <stdexcept>
 #include <unordered_map>
+#include <memory>
 
 namespace pitta {
 
-	enum Type {
+	enum Type : char {
 		Int, Float, String, Bool, Null, Undefined, ClassInstance, ClassDef, Function
 	};
 
@@ -74,6 +75,7 @@ namespace pitta {
 		Value(const Callable* callable);
 		Value(const Class* classDef);
 		Value(const Instance* instance);
+		Value(const Value& value);
 
 	private:
 		Type type = Undefined;
@@ -88,7 +90,7 @@ namespace pitta {
 			const Class* classDef;
 			const Instance* instance;
 		} rep;
-		std::string stringVal;
+		std::unique_ptr<std::string> stringVal = std::make_unique<std::string>();
 	};
 
 	class PittaRuntimeException final : public std::runtime_error {
