@@ -116,7 +116,7 @@ namespace pitta {
 		}
 
 		Value visitGetExpr(Get<Value>* expr) {
-			//TODO
+			resolve(expr->object);
 			return Null;
 		}
 

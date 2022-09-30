@@ -24,8 +24,12 @@ namespace pitta {
 
 		std::string asString()const;
 
+		const Value& get(const Token& name)const;
+		const Value& get(const std::string& name)const;
+
 		Instance(Class const* definition);
 	private:
 		Class const*const classDefinition;
+		std::unordered_map<std::string, Value> fields;
 	};
 }

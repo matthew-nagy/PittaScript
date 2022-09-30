@@ -179,6 +179,10 @@ namespace pitta {
 					Token name = ((Variable<R>*)expr)->name;
 					return track(new Assign<R>(name, value));
 				}
+				else if (expr->getType() == typeid(Get<R>)) {
+					Get<R>* get = (Get<R>*)expr;
+					return track(new Set<R>(get->object, get->name, value));
+				}
 
 				error(equals, "Invalid assignment target.");
 			}
@@ -272,8 +276,13 @@ namespace pitta {
 			Expr<R>* expr = primary();
 
 			while (true) {
-				if (match(LEFT_PAREN))
+				if (match(LEFT_PAREN)) {
 					expr = finishCall(expr);
+				}
+				else if (match(DOT)) {
+					Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+					expr = track(new Get<R>(expr, name));
+				}
 				else
 					break;
 			}

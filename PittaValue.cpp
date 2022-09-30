@@ -398,7 +398,7 @@ namespace pitta {
 		type = value.type;
 		isBoundPointer = value.isBoundPointer;
 		if (type == String && !isBoundPointer)
-			*stringVal == *value.stringVal;
+			*stringVal = *value.stringVal;
 	}
 
 }

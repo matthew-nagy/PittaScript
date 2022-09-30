@@ -115,7 +115,11 @@ case OpType:\
 	}
 
 	Value Interpreter::visitGetExpr(Get<Value>* expr) {
-		//TODO
+		Value object = evaluate(expr->object);
+		if (object.getType() == ClassInstance)
+			return object.asInstance()->get(expr->name);
+
+		throw new PittaRuntimeException("On '" + expr->name.lexeme + "': Only instances have properties.");
 		return Null;
 	}
 

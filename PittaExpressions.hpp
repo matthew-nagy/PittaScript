@@ -30,7 +30,7 @@ namespace pitta {
 		virtual T visitLogicalExpr(Logical<T>* expr) = 0;
 		virtual T visitCallExpr(Call<T>* expr) = 0;
 		virtual T visitGetExpr(Get<T>* expr) = 0;
-		//virtual T visitSetExpr(Set<T>* expr) = 0;
+		virtual T visitSetExpr(Set<T>* expr) = 0;
 		//virtual T visitThisExpr(This<T>* expr) = 0;
 		//virtual T visitSuperExpr(Super<T>* expr) = 0;
 	};
@@ -141,6 +141,8 @@ public:\
 	SingleArgExp(Literal, Value, value, visitLiteralExpr);
 
 	TripleArgExp(Logical, Expr<T>*, left, Token, op, Expr<T>*, right, visitLogicalExpr);
+
+	TripleArgExp(Set, Expr<T>*, object, Token, name, Expr<T>*, value, visitSetExpr);
 
 	DoubleArgExp(Unary, Token, op, Expr<T>*, right, visitUnaryExpr);
 

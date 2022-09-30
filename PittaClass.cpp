@@ -29,6 +29,18 @@ namespace pitta {
 		return "Instance of class " + classDefinition->getName();
 	}
 
+	const Value& Instance::get(const Token& name)const {
+		return get(name.lexeme);
+	}
+	const Value& Instance::get(const std::string& name)const {
+#ifdef _DEBUG
+		if (fields.count(name) == 0) {
+			throw new PittaRuntimeException("Cannot find field with name " + name + ".");
+		}
+#endif
+		return fields.at(name);
+	}
+
 	Instance::Instance(Class const* definition) :
 		classDefinition(definition)
 	{}
