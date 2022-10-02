@@ -14,12 +14,23 @@ int fib(int n) {
 
 int main() {
 
-	std::cout << sizeof(pitta::Value) << std::endl;
-	std::cout << sizeof(std::string) << std::endl;
-	std::cout << sizeof(std::unique_ptr<std::string>) << std::endl;
-
 	std::stringstream buffer;
-	std::ifstream file("ProgramCollision.txt");
+
+	std::string programs[] = { "ProgramFib.txt", "ProgramCollision.txt" };
+	const int numOfPrograms = 2;
+	printf("What program do you want to run?:\n");
+	for (int i = 0; i < numOfPrograms; i++)
+		printf("\t%s\t%d\n", programs[i].c_str(), i);
+	printf(">>");
+	std::string choice = "";
+	std::cin >> choice;
+	int choiceNum = std::atoi(choice.c_str());
+	if (choiceNum < 0 || choiceNum >= numOfPrograms) {
+		printf("That was not a valid choice \n\n\n");
+		return main();
+	}
+
+	std::ifstream file(programs[choiceNum]);
 	buffer << file.rdbuf();
 
 	pitta::Runtime runtime;
@@ -47,12 +58,7 @@ int main() {
 		printf("There was an error, cannot run!\n");
 	}
 
-	std::string a;
-	std::cout << "Ready to see the full power of cpp?";
-	std::getline(std::cin, a);
-	for (int i = 0; i < 20; i = i + 1) {
-		printf("%d\n", fib(i));
-	}
+	system("pause");
 
 	return 0;
 }

@@ -22,7 +22,7 @@ namespace pitta {
 		virtual Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const = 0;
 
 		virtual Callable* bind(Instance* instance) {
-			throw new PittaRuntimeException("A native function should not be being bound to a value of this type");
+			throw new PittaRuntimeException("This type of function cannot be bound.");
 			return nullptr;
 		}
 
