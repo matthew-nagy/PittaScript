@@ -11,6 +11,7 @@ int fib(int n) {
 }
 
 #include <iostream>
+#include "PittaIntegration.hpp"
 
 int main() {
 

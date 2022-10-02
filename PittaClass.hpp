@@ -18,6 +18,8 @@ namespace pitta {
 		Callable* findMethod(const std::string& methodName)const;
 
 		Class(const std::string& name, Class const* superclass, std::unordered_map<std::string, Callable*>&& methods);
+		Class(const std::string& name, Class const* superclass, const std::unordered_map<std::string, Callable*>& methods);
+		virtual ~Class() = default;
 	private:
 		std::unordered_map<std::string, Callable*> methods;
 	};
@@ -34,8 +36,8 @@ namespace pitta {
 		void set(const std::string& name, const Value& value);
 
 		Instance(Class const* definition);
-		~Instance();
-	private:
+		virtual ~Instance();
+	protected:
 		Class const*const classDefinition;
 		std::unordered_map<std::string, Value> fields;
 		std::vector<Callable*> generatedCallables;

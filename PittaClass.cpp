@@ -43,6 +43,12 @@ namespace pitta {
 		superclass(superclass),
 		methods(std::move(methods))
 	{}
+	Class::Class(const std::string& name, Class const* superclass, const std::unordered_map<std::string, Callable*>& methods):
+		Callable(findArity(methods), name),
+		name(name),
+		superclass(superclass),
+		methods(methods)
+	{}
 
 
 	std::string Instance::asString()const {
@@ -71,7 +77,7 @@ namespace pitta {
 		set(name.lexeme, value);
 	}
 	void Instance::set(const std::string& name, const Value& value) {
-		fields.emplace(name, value);
+		fields[name] = value;
 	}
 
 	Instance::Instance(Class const* definition) :
