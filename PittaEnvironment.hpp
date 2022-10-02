@@ -14,6 +14,8 @@ namespace pitta {
 
 		void define(const Token& name, const Value& value);
 
+		void define(const std::string& name, const Value& value);
+
 		void assign(const Token& name, const Value& value);
 
 		void assign(const std::string& name, const Value& value);

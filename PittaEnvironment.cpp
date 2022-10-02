@@ -3,7 +3,11 @@
 namespace pitta {
 
 	void Environment::define(const Token& name, const Value& value) {
-		values.emplace(name.lexeme, value);
+		define(name.lexeme, value);
+	}
+
+	void Environment::define(const std::string& name, const Value& value) {
+		values.emplace(name, value);
 	}
 
 	void Environment::assign(const Token& name, const Value& value) {

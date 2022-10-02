@@ -11,3 +11,12 @@ actual:
 fix closure thing	_/
 classes
 inheritance
+
+We could make a new type of callable specifically for C++ method functions. If we are making a C++ class from pittascript, then the bind
+could set a private member variable that would be accessed from inside of call when it is calling the cpp function.
+Init would have to be bodged to correct type of cpp class, but class instances could probably be passed into the runtime as long as
+it was properly bound to the methods
+The variable fields are fine as long as it has been properly "bound". Ie, pointers are set
+Maybe do something for bound instances in Value. After all, x.pos = Vec2(...) would currently just reasign the instance pointer, but maybe if it were
+bound, it would instead use a "copy" function or something. Things to think about. Would loop through all fields, and if it isn't a callable, reasign.
+Maybe recursivly do on instance, idk right now I am sleep deprived, I can't plan out anything that goes off what the book lays out

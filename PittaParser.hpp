@@ -295,6 +295,7 @@ namespace pitta {
 			if (match(TRUE)) return track(new Literal<R>(true));
 			if (match(NIL)) return track(new Literal<R>(Null));
 			if (match(UNDEFINED)) return track(new Literal<R>(Undefined));
+			if (match(THIS))return track(new This<R>(previous()));
 			if (match(IDENTIFIER)) return track(new Variable<R>(previous()));
 
 			if (match({ INT, FLOAT, STRING })) {

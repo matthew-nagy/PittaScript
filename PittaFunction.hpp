@@ -7,6 +7,7 @@
 namespace pitta {
 
 	typedef Value(*FunctionSigniture)(Interpreter*, const std::vector<Value>&);
+	class Instance;
 
 	class Callable {
 	public:
@@ -19,6 +20,11 @@ namespace pitta {
 			return name;
 		}
 		virtual Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const = 0;
+
+		virtual Callable* bind(Instance* instance) {
+			throw new PittaRuntimeException("A native function should not be being bound to a value of this type");
+			return nullptr;
+		}
 
 		Callable(int arity, const std::string& name):
 			arity(arity),
@@ -70,6 +76,13 @@ namespace pitta {
 				delete returnValue;
 			}
 			return toReturn;
+		}
+
+		Callable* bind(Instance* instance) {
+			std::shared_ptr<Environment> environment = std::make_shared<Environment>(closure);
+			environment->define(c_classSelfReferenceKey, instance);
+			
+			return new ScriptCallable(declaration, environment);
 		}
 
 		ScriptCallable(FunctionStmt<void, Value>* declaration, std::shared_ptr<Environment> closure):

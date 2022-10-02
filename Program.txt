@@ -8,11 +8,22 @@ for(var i = 0; i < 5; i = i + 1){
 	}
 }
 
-class TestClass{}
+class TestClass{
+	sayHello(){
+		print "Hello there";
+	}
+	spicyHello(){
+		print "Saying hello, my spice is " ++ this.spice;
+	}
 
-var testOfClasses = TestClass();
-
+	init(spiceName){
+		this.spice = spiceName;
+	}
+}
+var testOfClasses = TestClass("salt");
 print testOfClasses;
+testOfClasses.sayHello();
+testOfClasses.spicyHello();
 
 print "Loop test over";
 print "Heccin fibbonaccii numbers lets go";

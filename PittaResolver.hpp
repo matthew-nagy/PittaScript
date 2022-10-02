@@ -20,14 +20,22 @@ namespace pitta {
 		{}
 
 	private:
-		enum class FunctionType {
-			None,
-			Function
+		enum class FunctionType : char {
+			NONE,
+			FUNCTION,
+			INITIALISER,
+			METHOD
+		};
+
+		enum class ClassType : char {
+			NONE,
+			CLASS
 		};
 
 		Interpreter* interpreter;
 		std::vector<std::unordered_map<std::string, bool>> scopes;
-		FunctionType currentFunction = FunctionType::None;
+		FunctionType currentFunction = FunctionType::NONE;
+		ClassType currentClass = ClassType::NONE;
 
 
 		void resolve(std::vector<Stmt<void, Value>*>& statements) {
@@ -99,20 +107,20 @@ namespace pitta {
 		Value visitAssignExpr(Assign<Value>* expr) {
 			resolve(expr->value);
 			resolveLocal(expr, expr->name);
-			return 0;
+			return Null;
 		}
 
 		Value visitBinaryExpr(Binary<Value>* expr) {
 			resolve(expr->left);
 			resolve(expr->right);
-			return 0;
+			return Null;
 		}
 
 		Value visitCallExpr(Call<Value>* expr) {
 			resolve(expr->callee);
 			for (auto& arg : expr->arguments)
 				resolve(arg);
-			return 0;
+			return Null;
 		}
 
 		Value visitGetExpr(Get<Value>* expr) {
@@ -122,22 +130,37 @@ namespace pitta {
 
 		Value visitGroupingExpr(Grouping<Value>* expr) {
 			resolve(expr->expression);
-			return 0;
+			return Null;
 		}
 
 		Value visitLiteralExpr(Literal<Value>* expr){
-			return 0;
+			return Null;
 		}
 
 		Value visitLogicalExpr(Logical<Value>* expr) {
 			resolve(expr->left);
 			resolve(expr->right);
-			return 0;
+			return Null;
+		}
+
+		Value visitSetExpr(Set<Value>* expr) {
+			resolve(expr->value);
+			resolve(expr->object);
+			return Null;
+		}
+
+		Value visitThisExpr(This<Value>* expr) {
+#ifdef _DEBUG
+			if (currentClass == ClassType::NONE)
+				interpreter->getRuntime()->error(expr->keyword, "'" + c_classSelfReferenceKey + "' keyword is ony allowed inside classes.");
+#endif
+			resolveLocal(expr, expr->keyword);
+			return Null;
 		}
 
 		Value visitUnaryExpr(Unary<Value>* expr) {
 			resolve(expr->right);
-			return 0;
+			return Null;
 		}
 
 		Value visitVariableExpr(Variable<Value>* expr) {
@@ -153,7 +176,7 @@ namespace pitta {
 			}
 
 			resolveLocal(expr, expr->name);
-			return 0;
+			return Null;
 		}
 
 
@@ -165,8 +188,23 @@ namespace pitta {
 		}
 
 		void visitClassStmt(ClassStmt<void, Value>* stmt)override {
+			ClassType enclosingClassType = currentClass;
+			currentClass = ClassType::CLASS;
+
 			declare(stmt->name);
 			define(stmt->name);
+
+			beginScope();
+			scopes.back().emplace(c_classSelfReferenceKey, true);
+
+			for (FunctionStmt<void, Value>* method : stmt->methods) {
+				FunctionType declaration = method->name.lexeme == "init" ? FunctionType::INITIALISER : FunctionType::METHOD;
+				resolveFunction(method, declaration);
+			}
+
+			endScope();
+
+			currentClass = enclosingClassType;
 		}
 
 		void visitExpressionStmt(Expression<void, Value>* stmt) {
@@ -177,7 +215,7 @@ namespace pitta {
 			declare(stmt->name);
 			define(stmt->name);
 
-			resolveFunction(stmt, FunctionType::Function);
+			resolveFunction(stmt, FunctionType::FUNCTION);
 		}
 
 		void visitIfStmt(If<void, Value>* stmt) {
@@ -192,9 +230,14 @@ namespace pitta {
 		}
 
 		void visitReturnStmt(Return<void, Value>* stmt) {
-			if (currentFunction == FunctionType::None) {
+#ifdef _DEBUG
+			if (currentFunction == FunctionType::NONE) {
 				interpreter->getRuntime()->error(stmt->keyword, "Can't return from top level code");
 			}
+			if (currentFunction == FunctionType::INITIALISER && stmt->value != nullptr) {
+				interpreter->getRuntime()->error(stmt->keyword, "Can't return a value from an object initialiser");
+			}
+#endif
 			if (stmt->value != nullptr)
 				resolve(stmt->value);
 		}

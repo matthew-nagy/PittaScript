@@ -12,11 +12,15 @@ namespace pitta {
 
 		std::string asString()const;
 
-		int getArity()const override;
-
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override;
 
-		Class(const std::string& name);
+		Callable* findMethod(const std::string& methodName)const;
+
+		Class(const std::string& name, std::unordered_map<std::string, Callable*>&& methods);
+	private:
+		std::unordered_map<std::string, Callable*> methods;
+
+		int findArity(const std::unordered_map<std::string, Callable*>& methods)const;
 	};
 	
 	class Instance {
@@ -24,12 +28,17 @@ namespace pitta {
 
 		std::string asString()const;
 
-		const Value& get(const Token& name)const;
-		const Value& get(const std::string& name)const;
+		Value get(const Token& name);
+		Value get(const std::string& name);
+
+		void set(const Token& name, const Value& values);
+		void set(const std::string& name, const Value& value);
 
 		Instance(Class const* definition);
+		~Instance();
 	private:
 		Class const*const classDefinition;
 		std::unordered_map<std::string, Value> fields;
+		std::vector<Callable*> generatedCallables;
 	};
 }

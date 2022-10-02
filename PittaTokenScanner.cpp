@@ -23,6 +23,7 @@ namespace pitta {
 		{ '/', SLASH}
 	};
 
+	const std::string c_classSelfReferenceKey = "this";
 	const std::unordered_map<std::string, TokenType> keywords = {
 		{ "and", AND },
 		{ "class", CLASS },
@@ -37,7 +38,7 @@ namespace pitta {
 		{ "print", PRINT },
 		{ "return", RETURN },
 		{ "super", SUPER },
-		{ "this", THIS },
+		{ c_classSelfReferenceKey, THIS },
 		{ "true", TRUE },
 		{ "undefined", UNDEFINED },
 		{ "var", VAR },

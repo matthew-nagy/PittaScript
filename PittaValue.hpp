@@ -33,7 +33,7 @@ namespace pitta {
 		std::string asString()const;
 		const Callable* asCallable()const;
 		const Class* asClass()const;
-		const Instance* asInstance()const;
+		Instance* asInstance()const;
 
 		void setInt(int value);
 		void setFloat(float value);
@@ -41,7 +41,7 @@ namespace pitta {
 		void setString(const std::string& value);
 		void setCallable(const Callable* callable);
 		void setClass(const Class* classDef);
-		void setInstance(const Instance* instance);
+		void setInstance(Instance* instance);
 		void setNull();
 		void setUndefined();
 
@@ -57,7 +57,7 @@ namespace pitta {
 		Value& operator=(const std::string& value);
 		Value& operator=(const Callable* callable);
 		Value& operator=(const Class* classDef);
-		Value& operator=(const Instance* instance);
+		Value& operator=(Instance* instance);
 		Value& operator=(Type);
 
 		bool operator==(const Value& right)const;
@@ -74,7 +74,7 @@ namespace pitta {
 		Value(std::string* val);
 		Value(const Callable* callable);
 		Value(const Class* classDef);
-		Value(const Instance* instance);
+		Value(Instance* instance);
 		Value(const Value& value);
 
 	private:
@@ -88,7 +88,7 @@ namespace pitta {
 			std::string* stringValP;
 			const Callable* func;
 			const Class* classDef;
-			const Instance* instance;
+			Instance* instance;
 		} rep;
 		std::unique_ptr<std::string> stringVal = std::make_unique<std::string>();
 	};

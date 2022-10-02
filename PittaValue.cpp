@@ -162,7 +162,7 @@ namespace pitta {
 		return rep.classDef;
 	}
 
-	const Instance* Value::asInstance()const {
+	Instance* Value::asInstance()const {
 		return rep.instance;
 	}
 
@@ -216,7 +216,7 @@ namespace pitta {
 		type = ClassDef;
 		rep.classDef = classDef;
 	}
-	void Value::setInstance(const Instance* instance) {
+	void Value::setInstance(Instance* instance) {
 		if (!(type == Null || type == Undefined))
 			throw new PittaRuntimeException("Cannot assign an instance of a class to a non null or undefined value");
 		type = ClassInstance;
@@ -313,7 +313,7 @@ namespace pitta {
 		setClass(classDef);
 		return *this;
 	}
-	Value& Value::operator=(const Instance* instance) {
+	Value& Value::operator=(Instance* instance) {
 		setInstance(instance);
 		return *this;
 	}
@@ -390,7 +390,7 @@ namespace pitta {
 	Value::Value(const Class* classDef) {
 		setClass(classDef);
 	}
-	Value::Value(const Instance* instance) {
+	Value::Value(Instance* instance) {
 		setInstance(instance);
 	}
 	Value::Value(const Value& value) {

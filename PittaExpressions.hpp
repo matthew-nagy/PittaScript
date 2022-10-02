@@ -31,7 +31,7 @@ namespace pitta {
 		virtual T visitCallExpr(Call<T>* expr) = 0;
 		virtual T visitGetExpr(Get<T>* expr) = 0;
 		virtual T visitSetExpr(Set<T>* expr) = 0;
-		//virtual T visitThisExpr(This<T>* expr) = 0;
+		virtual T visitThisExpr(This<T>* expr) = 0;
 		//virtual T visitSuperExpr(Super<T>* expr) = 0;
 	};
 
@@ -144,6 +144,8 @@ public:\
 
 	TripleArgExp(Set, Expr<T>*, object, Token, name, Expr<T>*, value, visitSetExpr);
 
+	SingleArgExp(This, Token, keyword, visitThisExpr);
+
 	DoubleArgExp(Unary, Token, op, Expr<T>*, right, visitUnaryExpr);
 
 	template<class T>
@@ -208,6 +210,20 @@ public:\
 		std::string visitLogicalExpr(Logical<std::string>* expr) {
 			const std::string ret = "( " + expr->left->accept(this) + " " + expr->op.lexeme + " " + expr->left->accept(this) + " )";
 			//printf("Visiting literal expression: %s\n", ret.c_str());
+			return ret;
+		}
+
+		std::string visitSetExpr(Set<std::string>* expr) {
+			throw 0;
+			//TODO
+			const std::string ret = "";
+			return ret;
+		}
+
+		std::string visitThisExpr(This<std::string>* expr) {
+			throw 0;
+			//TODO
+			const std::string ret = "";
 			return ret;
 		}
 

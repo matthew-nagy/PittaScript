@@ -26,6 +26,10 @@ namespace pitta {
 
 		Value visitLogicalExpr(Logical<Value>* expr);
 
+		Value visitSetExpr(Set<Value>* expr);
+
+		Value visitThisExpr(This<Value>* expr);
+
 		Value visitUnaryExpr(Unary<Value>* expr);
 
 		Value visitVariableExpr(Variable<Value>* expr);

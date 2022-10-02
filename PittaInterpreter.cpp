@@ -140,6 +140,23 @@ case OpType:\
 		return expr->value;
 	}
 
+	Value Interpreter::visitSetExpr(Set<Value>* expr) {
+		Value object = evaluate(expr->object);
+
+#ifdef _DEBUG
+		if (object.getType() != ClassInstance)
+			throw(new PittaRuntimeException(expr->name.lexeme + ": Only instances have fields."));
+#endif
+		
+		Value value = evaluate(expr->value);
+		object.asInstance()->set(expr->name, value);
+		return value;
+	}
+
+	Value Interpreter::visitThisExpr(This<Value>* expr) {
+		return lookUpVariable(expr->keyword, expr);
+	}
+
 	Value Interpreter::visitUnaryExpr(Unary<Value>* expr) {
 		Value right = evaluate(expr->right);
 
@@ -191,7 +208,15 @@ case OpType:\
 
 	void Interpreter::visitClassStmt(ClassStmt<void, Value>* stmt) {
 		environment->define(stmt->name, Null);
-		Class* classDefinition = new Class(stmt->name.lexeme);
+
+		std::unordered_map<std::string, Callable*> methods;
+		for (auto& method : stmt->methods) {
+			Callable* function = new ScriptCallable(method, environment);
+			methods.emplace(method->name.lexeme, function);
+			generatedCallables.emplace_back(function);
+		}
+
+		Class* classDefinition = new Class(stmt->name.lexeme, std::move(methods));
 		generatedClasses.emplace_back(classDefinition);
 		environment->assign(stmt->name, classDefinition);
 	}

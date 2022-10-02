@@ -11,6 +11,8 @@ namespace pitta {
 	//Forwards declare the runtime
 	class Runtime;
 
+	extern const std::string c_classSelfReferenceKey;
+
 	enum TokenType {
 		// Single-character tokens.
 		LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
