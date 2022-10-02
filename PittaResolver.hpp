@@ -149,6 +149,11 @@ namespace pitta {
 			return Null;
 		}
 
+		Value visitSuperExpr(Super<Value>* expr) {
+			resolveLocal(expr, expr->keyword);
+			return Null;
+		}
+
 		Value visitThisExpr(This<Value>* expr) {
 #ifdef _DEBUG
 			if (currentClass == ClassType::NONE)
@@ -194,6 +199,18 @@ namespace pitta {
 			declare(stmt->name);
 			define(stmt->name);
 
+			if (stmt->superclass != nullptr) {
+				if (stmt->superclass->name.lexeme == stmt->name.lexeme) {
+					interpreter->getRuntime()->error(stmt->name, "A class cannot inherit from itself");
+				}
+
+				resolve(stmt->superclass);
+
+				beginScope();
+				scopes.back().emplace("super", true);
+			}
+
+
 			beginScope();
 			scopes.back().emplace(c_classSelfReferenceKey, true);
 
@@ -203,6 +220,8 @@ namespace pitta {
 			}
 
 			endScope();
+			if (stmt->superclass != nullptr)
+				endScope();
 
 			currentClass = enclosingClassType;
 		}

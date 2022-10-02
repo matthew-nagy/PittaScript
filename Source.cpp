@@ -19,7 +19,7 @@ int main() {
 	std::cout << sizeof(std::unique_ptr<std::string>) << std::endl;
 
 	std::stringstream buffer;
-	std::ifstream file("Program.txt");
+	std::ifstream file("ProgramCollision.txt");
 	buffer << file.rdbuf();
 
 	pitta::Runtime runtime;

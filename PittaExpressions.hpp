@@ -32,7 +32,7 @@ namespace pitta {
 		virtual T visitGetExpr(Get<T>* expr) = 0;
 		virtual T visitSetExpr(Set<T>* expr) = 0;
 		virtual T visitThisExpr(This<T>* expr) = 0;
-		//virtual T visitSuperExpr(Super<T>* expr) = 0;
+		virtual T visitSuperExpr(Super<T>* expr) = 0;
 	};
 
 
@@ -144,6 +144,8 @@ public:\
 
 	TripleArgExp(Set, Expr<T>*, object, Token, name, Expr<T>*, value, visitSetExpr);
 
+	DoubleArgExp(Super, Token, keyword, Token, method, visitSuperExpr);
+
 	SingleArgExp(This, Token, keyword, visitThisExpr);
 
 	DoubleArgExp(Unary, Token, op, Expr<T>*, right, visitUnaryExpr);
@@ -214,6 +216,13 @@ public:\
 		}
 
 		std::string visitSetExpr(Set<std::string>* expr) {
+			throw 0;
+			//TODO
+			const std::string ret = "";
+			return ret;
+		}
+
+		std::string visitSuperExpr(Super<std::string>* expr) {
 			throw 0;
 			//TODO
 			const std::string ret = "";

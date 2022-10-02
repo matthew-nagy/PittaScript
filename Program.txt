@@ -25,6 +25,12 @@ print testOfClasses;
 testOfClasses.sayHello();
 testOfClasses.spicyHello();
 
+class InheritanceTest < TestClass {
+	init(){
+		
+	}
+}
+
 print "Loop test over";
 print "Heccin fibbonaccii numbers lets go";
 

@@ -9,6 +9,7 @@ namespace pitta {
 	class Class : public Callable{
 	public:
 		const std::string name;
+		Class const*const superclass;
 
 		std::string asString()const;
 
@@ -16,11 +17,9 @@ namespace pitta {
 
 		Callable* findMethod(const std::string& methodName)const;
 
-		Class(const std::string& name, std::unordered_map<std::string, Callable*>&& methods);
+		Class(const std::string& name, Class const* superclass, std::unordered_map<std::string, Callable*>&& methods);
 	private:
 		std::unordered_map<std::string, Callable*> methods;
-
-		int findArity(const std::unordered_map<std::string, Callable*>& methods)const;
 	};
 	
 	class Instance {

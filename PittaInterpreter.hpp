@@ -28,6 +28,8 @@ namespace pitta {
 
 		Value visitSetExpr(Set<Value>* expr);
 
+		Value visitSuperExpr(Super<Value>* expr);
+
 		Value visitThisExpr(This<Value>* expr);
 
 		Value visitUnaryExpr(Unary<Value>* expr);

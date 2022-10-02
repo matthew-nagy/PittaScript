@@ -1,0 +1,91 @@
+#Get the square distance between two points
+func getDistanceSqr(point1, point2){
+	var xDist = point1.x - point2.x;
+	var yDist = point1.y - point2.y;
+
+	var distSqr = (xDist * xDist) + (yDist * yDist);
+
+	return distSqr;
+}
+
+#Run collision between a circle and a point
+func circlePoint(circle, point){
+	var csqr = circle.radius * circle.radius;
+
+	var distSqr = getDistanceSqr(circle.position, point);
+
+	return distSqr <= csqr;
+}
+
+#Run collision between a point and a point
+func pointPoint(point1, point2){
+	return point1.x == point2.x && point1.y == point2.y;
+}
+
+#Run collision between a circle and a circle
+func circleCircle(circle1, circle2){
+	var distanceSqr = getDistanceSqr(circle1.position, circle2.position);
+	var totRad = circle1.radius + circle2.radius;
+
+	return (totRad * totRad) >= distanceSqr;
+}
+
+var POINT_TYPE = 0;
+var CIRCLE_TYPE = 1;
+
+class Collider{
+	getType(){
+		return this.type;
+	}
+
+	collides(otherCollider){
+		if(this.type == POINT_TYPE){
+			if(otherCollider.getType() == POINT_TYPE){
+				return pointPoint(this, otherCollider);
+			}
+			return circlePoint(otherCollider, this);
+		}
+		if(otherCollider.getType() == CIRCLE_TYPE){
+			return circleCircle(otherCollider, this);
+		}
+		return circlePoint(this, otherCollider);
+	}
+
+	init(myType){
+		this.type = myType;
+	}
+}
+
+class Point < Collider{
+	init(x, y){
+		super.init(POINT_TYPE);
+		this.x = x;
+		this.y = y;
+	}
+}
+
+class Circle < Collider{
+	init(x, y, radius){
+		super.init(CIRCLE_TYPE);
+		this.position = Point(x, y);
+		this.radius = radius;
+	}
+}
+
+var centerCircle = Circle(0, 0, 5);
+var collidingPoint = Point(3, 4);
+var nonCollidingPoint = Point(-3, 6);
+var collidingCircle = Circle(6, 2, 7);
+var nonCollidingCircle = Circle(-10, 3, 2);
+
+func getStringFromBool(val){
+	if(val){
+		return "true";
+	}
+	return "false";
+}
+
+print "Checking collision with point, expecting true:		" ++ getStringFromBool(centerCircle.collides(collidingPoint));
+print "Checking collision with point, expecting false:		" ++ getStringFromBool(centerCircle.collides(nonCollidingPoint));
+print "Checking collision with circle, expecting true:		" ++ getStringFromBool(centerCircle.collides(collidingCircle));
+print "Checking collision with circle, expecting false:	" ++ getStringFromBool(centerCircle.collides(nonCollidingCircle));

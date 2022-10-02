@@ -302,6 +302,14 @@ namespace pitta {
 				return track(new Literal<R>(previous().getLiteralValue()));
 			}
 
+			if (match(SUPER)) {
+				Token keyword = previous();
+				consume(DOT, "Expect '.' after 'super'.");
+				Token method = consume(IDENTIFIER,
+					"Expect superclass method name.");
+				return track(new Super<R>(keyword, method));
+			}
+
 			if (match(LEFT_PAREN)) {
 				Expr<R>* expr = expression();
 				consume(RIGHT_PAREN, "Expect ')' after expression.");
@@ -353,6 +361,14 @@ namespace pitta {
 
 		Stmt<T, R>* classDeclaration() {
 			Token name = consume(IDENTIFIER, "Expected a class name");
+
+			Variable<R>* superclass = nullptr;
+			if (match(LESS)) {
+				consume(IDENTIFIER, "Expect superclass name");
+				superclass = new Variable<R>(previous());
+				track(superclass);
+			}
+
 			consume(LEFT_BRACE, "Expect '{' before class body");
 
 			std::vector<FunctionStmt<T, R>*> methods;
@@ -362,7 +378,7 @@ namespace pitta {
 
 			consume(RIGHT_BRACE, "Expect '}' after class body.");
 
-			return track(new ClassStmt<T, R>(name, methods));
+			return track(new ClassStmt<T, R>(name, superclass, methods));
 		}
 
 		Stmt<T, R>* expressionStatement() {

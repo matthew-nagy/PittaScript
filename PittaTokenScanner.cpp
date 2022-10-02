@@ -14,8 +14,6 @@ namespace pitta {
 		{ '.', DOT },
 		{ '-', MINUS },
 		{ '%', PERCENT },
-		{ '|', BIT_OR },
-		{ '&', BIT_AND },
 		{ '^', BIT_XOR },
 		{ '~', BIT_NOT },
 		{ ';', SEMICOLON },
@@ -281,6 +279,13 @@ namespace pitta {
 
 				case '"':
 					scanStringLiteral();
+					break;
+
+				case '&':
+					addToken(match('&') ? AND : BIT_AND);
+					break;
+				case '|':
+					addToken(match('|') ? OR : BIT_OR);
 					break;
 
 				default:

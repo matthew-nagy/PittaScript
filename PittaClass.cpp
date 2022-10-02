@@ -9,6 +9,10 @@ namespace pitta {
 	Callable* Class::findMethod(const std::string& methodName)const {
 		if (methods.count(methodName) > 0)
 			return methods.at(methodName);
+
+		if (superclass != nullptr)
+			return superclass->findMethod(methodName);
+
 		return nullptr;
 	}
 
@@ -27,17 +31,18 @@ namespace pitta {
 		return newInstance;
 	}
 
-	Class::Class(const std::string& name, std::unordered_map<std::string, Callable*>&& methods) :
-		Callable(findArity(methods), name),
-		name(name),
-		methods(std::move(methods))
-	{}
-
-	int Class::findArity(const std::unordered_map<std::string, Callable*>& methods)const {
+	int findArity(const std::unordered_map<std::string, Callable*>& methods){
 		if (methods.count("init") == 0)
 			return 0;
 		return methods.at("init")->getArity();
 	}
+
+	Class::Class(const std::string& name, Class const* superclass, std::unordered_map<std::string, Callable*>&& methods) :
+		Callable(findArity(methods), name),
+		name(name),
+		superclass(superclass),
+		methods(std::move(methods))
+	{}
 
 
 	std::string Instance::asString()const {

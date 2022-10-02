@@ -153,6 +153,21 @@ case OpType:\
 		return value;
 	}
 
+	Value Interpreter::visitSuperExpr(Super<Value>* expr) {
+		const int distance = locals.at(expr);
+		Class const*const superclass = environment->getAt(distance, "super").asClass();
+		Instance* const instance = environment->getAt(distance - 1, "this").asInstance();
+
+		Callable* const method = superclass->findMethod(expr->method.lexeme);
+#ifdef _DEBUG
+		if (method == nullptr)
+			runtime->runtimeError(new PittaRuntimeException("Undefined propery '" + expr->method.lexeme + "'."));
+#endif
+		Callable* boundCallable = method->bind(instance);
+		generatedCallables.emplace_back(boundCallable);
+		return boundCallable;
+	}
+
 	Value Interpreter::visitThisExpr(This<Value>* expr) {
 		return lookUpVariable(expr->keyword, expr);
 	}
@@ -207,17 +222,35 @@ case OpType:\
 	}
 
 	void Interpreter::visitClassStmt(ClassStmt<void, Value>* stmt) {
+		Value superclass = Null;
+		if (stmt->superclass != nullptr) {
+			superclass = evaluate(stmt->superclass);
+#ifdef _DEBUG
+			if (superclass.getType() != ClassDef)
+				throw new PittaRuntimeException("Superclass must be a class.");
+#endif
+		}
+
 		environment->define(stmt->name, Null);
+		//Have to do some tomfoolery to prevent a "super" environment from going out of scope
+		std::shared_ptr<Environment> superEnvironment = std::make_shared<Environment>(environment);
+		std::shared_ptr<Environment>* workingEnvironment = &environment;
+
+		if (stmt->superclass != nullptr) {
+			workingEnvironment = &superEnvironment;
+			superEnvironment->define("super", superclass);
+		}
 
 		std::unordered_map<std::string, Callable*> methods;
 		for (auto& method : stmt->methods) {
-			Callable* function = new ScriptCallable(method, environment);
+			Callable* function = new ScriptCallable(method, *workingEnvironment);
 			methods.emplace(method->name.lexeme, function);
 			generatedCallables.emplace_back(function);
 		}
 
-		Class* classDefinition = new Class(stmt->name.lexeme, std::move(methods));
+		Class* classDefinition = new Class(stmt->name.lexeme, superclass.asClass(), std::move(methods));
 		generatedClasses.emplace_back(classDefinition);
+
 		environment->assign(stmt->name, classDefinition);
 	}
 

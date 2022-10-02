@@ -52,14 +52,16 @@ namespace pitta {
     class ClassStmt : public Stmt<T, R> {
     public:
         Token name;
+        Variable<R>* superclass;
         std::vector<FunctionStmt<T, R>*> methods;
 
         T accept(StatementVisitor<T, R>* visitor) {
             return visitor->visitClassStmt(this);
         }
 
-        ClassStmt(const Token& name, std::vector<FunctionStmt<T, R>*>& methods):
+        ClassStmt(const Token& name, Variable<R>* superclass, std::vector<FunctionStmt<T, R>*>& methods):
             name(name),
+            superclass(superclass),
             methods(methods)
         {}
     };
