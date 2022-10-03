@@ -236,18 +236,22 @@ namespace pitta {
 	}
 
 	void Value::bindInt(int* toBind) {
+		isBoundPointer = true;
 		type = Int;
 		rep.intValP = toBind;
 	}
 	void Value::bindFloat(float* toBind) {
+		isBoundPointer = true;
 		type = Float;
 		rep.floatValP = toBind;
 	}
 	void Value::bindBool(bool* toBind) {
+		isBoundPointer = true;
 		type = Bool;
 		rep.boolValP = toBind;
 	}
 	void Value::bindString(std::string* toBind) {
+		isBoundPointer = true;
 		type = String;
 		rep.stringValP = toBind;
 	}

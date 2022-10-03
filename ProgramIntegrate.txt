@@ -5,8 +5,7 @@ newIt.fullIntro();
 newIt.dbc();
 
 harold.sayShortIntro();
-harold.name = "Totally not Harlod";
-print harold.name;
-print harold.age;
+harold.name = "Totally not Harold";
+harold.age = 4;
 harold.fullIntro();
 harold.dbc();
