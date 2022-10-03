@@ -1,0 +1,12 @@
+var newIt = IT("Greg", 18, "I eat glue");
+newIt.fullIntro();
+newIt.setFactoids("Ham", 7);
+newIt.fullIntro();
+newIt.dbc();
+
+harold.sayShortIntro();
+harold.name = "Totally not Harlod";
+print harold.name;
+print harold.age;
+harold.fullIntro();
+harold.dbc();

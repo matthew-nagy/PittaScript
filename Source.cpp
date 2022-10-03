@@ -17,8 +17,8 @@ int main() {
 
 	std::stringstream buffer;
 
-	std::string programs[] = { "ProgramFib.txt", "ProgramCollision.txt" };
-	const int numOfPrograms = 2;
+	std::string programs[] = { "ProgramFib.txt", "ProgramCollision.txt", "ProgramIntegrate.txt"};
+	const int numOfPrograms = 3;
 	printf("What program do you want to run?:\n");
 	for (int i = 0; i < numOfPrograms; i++)
 		printf("\t%s\t%d\n", programs[i].c_str(), i);
@@ -48,7 +48,13 @@ int main() {
 	pitta::Scanner scanner(buffer.str(), &runtime);
 	pitta::Parser<void, pitta::Value> parser(scanner.scanTokens(), &runtime);
 	auto tree = parser.parse();
-	pitta::Interpreter interpreter(&runtime);
+
+	std::shared_ptr<pitta::Environment> globals = std::make_shared<pitta::Environment>();
+	globals->define("IT", pitta::ITClass);
+	pitta::IT test("Harold", 21, "Not a hand murderer");
+	globals->define("harold", pitta::ITClass->bindExistingInstance(&test));
+
+	pitta::Interpreter interpreter(&runtime, globals);
 	pitta::Resolver r(&interpreter);
 	r.sweepStatements(tree.statements);
 

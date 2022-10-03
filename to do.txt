@@ -20,3 +20,6 @@ The variable fields are fine as long as it has been properly "bound". Ie, pointe
 Maybe do something for bound instances in Value. After all, x.pos = Vec2(...) would currently just reasign the instance pointer, but maybe if it were
 bound, it would instead use a "copy" function or something. Things to think about. Would loop through all fields, and if it isn't a callable, reasign.
 Maybe recursivly do on instance, idk right now I am sleep deprived, I can't plan out anything that goes off what the book lays out
+
+Fix the yucky way functions are bound. I don't think there is a real need for a utility struct, at most make that a function
+also test it lmao bet it fails

@@ -45,13 +45,17 @@ namespace pitta {
 			return newInstance;
 		}
 
-		Value bindExistingInstance(T* instance, Interpreter* interpreter) {
+		Value bindExistingInstance(T* instance) {
 			auto fields = getFieldsFromInstance(instance);
 			IntegratedInstance<T>* newInstance = new IntegratedInstance<T>(this, instance, fields);
 
-			interpreter->registerNewInstance(newInstance);
+			generatedInstances.emplace_back(newInstance);
 
 			return newInstance;
+		}
+
+		int getArity()const override {
+			return 3;
 		}
 
 		IntegratedClass(const std::string& name, const std::unordered_map<std::string, Callable*>& methods, NewInstanceGenerator<T> generator, FieldsFromInstance<T> fielder):
@@ -65,6 +69,8 @@ namespace pitta {
 		~IntegratedClass() {
 			for (auto callable : generatedCallables)
 				delete callable;
+			for (auto instance : generatedInstances)
+				delete instance;
 		}
 
 
@@ -73,6 +79,8 @@ namespace pitta {
 		FieldsFromInstance<T> getFieldsFromInstance;
 
 		std::vector<Callable*> generatedCallables;
+		//Those made before the interpreter is created
+		std::vector<Instance*> generatedInstances;
 	};
 
 	template<class T>
@@ -141,6 +149,10 @@ namespace pitta {
 			funFact = in;
 		}
 
+		void doubleCheck() {
+			printf("I am at %p\n", this);
+		}
+
 		static std::unordered_map<std::string, Value> getPittaBinding(IT* instance) {
 			std::unordered_map<std::string, Value> binding;
 
@@ -169,6 +181,10 @@ namespace pitta {
 				instance->fullIntro();
 				return Null;
 				}), 0));
+			funcMap.try_emplace("dbc", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
+				instance->doubleCheck();
+				return Null;
+				}), 0));
 			funcMap.try_emplace("setFactoids", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>& arguments, IT* instance)->Value {
 				instance->setFactoids(arguments[0].asString(), arguments[1].asInt());
 				return Null;
@@ -184,7 +200,9 @@ namespace pitta {
 			name(name),
 			age(age),
 			funFact(funFact)
-		{}
+		{
+			printf("Created at %p\n", this);
+		}
 	private:
 		std::string name;
 		int age;
