@@ -1,0 +1,11 @@
+var matt = IT("Matthew", 21, "I think about dropping out often");
+matt.fullIntro();
+matt.age = 22;
+matt.sayShortIntro();
+
+matt.funFact = "I have a positive outlook on life";
+matt.name = "Matt";
+matt.fullIntro();
+
+harold.fullIntro();
+harold.setFactoids("Geoff", 69);

@@ -116,7 +116,8 @@ namespace pitta {
 
 		IntegratedCallable(int arity, const std::string& name, IntegratedFunctionSigniture<T> sig):
 			Callable(arity, name),
-			function(sig)
+			function(sig),
+			boundInstance(nullptr)
 		{}
 
 	private:
@@ -124,7 +125,24 @@ namespace pitta {
 		IntegratedInstance<T>* boundInstance;
 	};
 
-#define wrap(func, pittafunc) void pittafunc (Interpreter*, std::vector<Value>&){func();}
+	template<class T>
+	class IntegratedCallableGenerator {
+	public:
+		std::unordered_map<std::string, Callable*> get()const {
+			return callables;
+		}
+
+		template<class Lambda>
+		IntegratedCallableGenerator<T>& add(const std::string& name, int arity, Lambda lambda) {
+			callables.try_emplace(name, new IntegratedCallable(arity, name, IntegratedFunctionSigniture<T>(lambda)));
+			return *this;
+		}
+
+	private:
+		std::unordered_map<std::string, Callable*> callables;
+	};
+
+
 	class IT {
 	public:
 
@@ -166,34 +184,28 @@ namespace pitta {
 			return new IT(arguments[0].asString(), arguments[1].asInt(), arguments[2].asString());
 		}
 		static std::unordered_map<std::string, Callable*> getPittaFunctions() {
-
-			std::unordered_map<std::string, NameSigniturePair<IT>> funcMap;
-
-			funcMap.try_emplace("sayShortIntro", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
+			return IntegratedCallableGenerator<IT>()
+				.add("sayShortIntro", 0, [](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
 				instance->sayShortIntro();
 				return Null;
-				}), 0 ));
-			funcMap.try_emplace("sayFunFact", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
-				instance->sayFunFact();
-				return Null;
-				}), 0));
-			funcMap.try_emplace("fullIntro", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
-				instance->fullIntro();
-				return Null;
-				}), 0));
-			funcMap.try_emplace("dbc", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
-				instance->doubleCheck();
-				return Null;
-				}), 0));
-			funcMap.try_emplace("setFactoids", NameSigniturePair(IntegratedFunctionSigniture<IT>([](Interpreter*, const std::vector<Value>& arguments, IT* instance)->Value {
-				instance->setFactoids(arguments[0].asString(), arguments[1].asInt());
-				return Null;
-				}), 2));
-
-			std::unordered_map<std::string, Callable*> f;
-			for (auto& [name, p] : funcMap)
-				f.emplace(name, new IntegratedCallable(p.arity, name, p.signiture));
-			return f;
+					})
+				.add("sayFunFact", 0, [](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
+						instance->sayShortIntro();
+						return Null;
+					})
+				.add("fullIntro", 0, [](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
+						instance->fullIntro();
+						return Null;
+					})
+				.add("dbc", 0, [](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
+						instance->doubleCheck();
+						return Null;
+					})
+				.add("setFactoids", 2, [](Interpreter*, const std::vector<Value>& arguments, IT* instance)->Value {
+						instance->setFactoids(arguments[0].asString(), arguments[1].asInt());
+						return Null;
+					})
+				.get();
 		}
 
 		IT(std::string name, int age, std::string funFact):

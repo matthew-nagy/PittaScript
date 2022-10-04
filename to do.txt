@@ -12,6 +12,9 @@ fix closure thing	_/
 classes
 inheritance
 
+
+
+
 We could make a new type of callable specifically for C++ method functions. If we are making a C++ class from pittascript, then the bind
 could set a private member variable that would be accessed from inside of call when it is calling the cpp function.
 Init would have to be bodged to correct type of cpp class, but class instances could probably be passed into the runtime as long as

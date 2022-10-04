@@ -17,8 +17,8 @@ int main() {
 
 	std::stringstream buffer;
 
-	std::string programs[] = { "ProgramFib.txt", "ProgramCollision.txt", "ProgramIntegrate.txt"};
-	const int numOfPrograms = 3;
+	std::string programs[] = { "ProgramFib.txt", "ProgramCollision.txt", "ProgramIntegrate.txt", "ProgramPlayground.txt"};
+	const int numOfPrograms = 4;
 	printf("What program do you want to run?:\n");
 	for (int i = 0; i < numOfPrograms; i++)
 		printf("\t%s\t%d\n", programs[i].c_str(), i);
@@ -64,6 +64,9 @@ int main() {
 	else {
 		printf("There was an error, cannot run!\n");
 	}
+
+	printf("And now in c++\n");
+	test.fullIntro();
 
 	system("pause");
 
