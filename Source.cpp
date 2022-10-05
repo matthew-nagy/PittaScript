@@ -2,6 +2,7 @@
 #include "PittaRuntime.hpp"
 #include "PittaInterpreter.hpp"
 #include "PittaResolver.hpp"
+#include "PittaStl.hpp"
 #include <fstream>
 #include <sstream>
 
@@ -24,7 +25,7 @@ int main() {
 		printf("\t%s\t%d\n", programs[i].c_str(), i);
 	printf(">>");
 	std::string choice = "";
-	std::cin >> choice;
+	std::getline(std::cin, choice);
 	int choiceNum = std::atoi(choice.c_str());
 	if (choiceNum < 0 || choiceNum >= numOfPrograms) {
 		printf("That was not a valid choice \n\n\n");
@@ -49,7 +50,7 @@ int main() {
 	pitta::Parser<void, pitta::Value> parser(scanner.scanTokens(), &runtime);
 	auto tree = parser.parse();
 
-	std::shared_ptr<pitta::Environment> globals = std::make_shared<pitta::Environment>();
+	std::shared_ptr<pitta::Environment> globals = pitta::stl::getEnvironment();
 	globals->define("IT", pitta::ITClass);
 	pitta::IT test("Harold", 21, "Not a hand murderer");
 	globals->define("harold", pitta::ITClass->bindExistingInstance(&test));
