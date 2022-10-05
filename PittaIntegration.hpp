@@ -104,6 +104,22 @@ namespace pitta {
 	class IntegratedCallable : public Callable {
 	public:
 
+		class Binder {
+		public:
+			std::unordered_map<std::string, Callable*> get()const {
+				return callables;
+			}
+
+			template<class Lambda>
+			Binder& add(const std::string& name, int arity, Lambda lambda) {
+				callables.try_emplace(name, new IntegratedCallable(arity, name, IntegratedFunctionSigniture<T>(lambda)));
+				return *this;
+			}
+
+		private:
+			std::unordered_map<std::string, Callable*> callables;
+		};
+
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override {
 			return function(interpreter, arguments, boundInstance->getInnerInstance());
 		}
@@ -125,22 +141,6 @@ namespace pitta {
 		IntegratedInstance<T>* boundInstance;
 	};
 
-	template<class T>
-	class IntegratedCallableGenerator {
-	public:
-		std::unordered_map<std::string, Callable*> get()const {
-			return callables;
-		}
-
-		template<class Lambda>
-		IntegratedCallableGenerator<T>& add(const std::string& name, int arity, Lambda lambda) {
-			callables.try_emplace(name, new IntegratedCallable(arity, name, IntegratedFunctionSigniture<T>(lambda)));
-			return *this;
-		}
-
-	private:
-		std::unordered_map<std::string, Callable*> callables;
-	};
 
 
 	class IT {
@@ -184,7 +184,7 @@ namespace pitta {
 			return new IT(arguments[0].asString(), arguments[1].asInt(), arguments[2].asString());
 		}
 		static std::unordered_map<std::string, Callable*> getPittaFunctions() {
-			return IntegratedCallableGenerator<IT>()
+			return IntegratedCallable<IT>::Binder()
 				.add("sayShortIntro", 0, [](Interpreter*, const std::vector<Value>&, IT* instance)->Value {
 				instance->sayShortIntro();
 				return Null;
