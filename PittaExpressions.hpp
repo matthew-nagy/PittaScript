@@ -20,7 +20,6 @@ namespace pitta {
 	template<class T>
 	class ExpressionVisitor {
 	public:
-		virtual ~ExpressionVisitor() = default;
 		virtual T visitLiteralExpr(Literal<T>* expr) = 0;
 		virtual T visitAssignExpr(Assign<T>* expr) = 0;
 		virtual T visitBinaryExpr(Binary<T>* expr) = 0;
@@ -33,6 +32,8 @@ namespace pitta {
 		virtual T visitSetExpr(Set<T>* expr) = 0;
 		virtual T visitThisExpr(This<T>* expr) = 0;
 		virtual T visitSuperExpr(Super<T>* expr) = 0;
+
+		virtual ~ExpressionVisitor() = default;
 	};
 
 
@@ -43,6 +44,7 @@ namespace pitta {
 
 		virtual std::type_index getType()const = 0;
 
+		virtual ~Expr() = default;
 	};
 
 #define SingleArgExp(Name, ArgQualifier, ArgName, visitType)\
@@ -173,76 +175,76 @@ public:\
 			return expr->accept(this);
 		}
 
-		std::string visitAssignExpr(Assign<std::string>* expr) {
+		std::string visitAssignExpr(Assign<std::string>* expr) override{
 			return "( " + expr->name.lexeme + " = " + expr->value->accept(this) + " )";
 		}
 
-		std::string visitBinaryExpr(Binary<std::string>* expr) {
+		std::string visitBinaryExpr(Binary<std::string>* expr) override{
 			const std::string ret = "( " + expr->op.lexeme + " " + expr->left->accept(this) + " " + expr->right->accept(this) + " )";
 			//printf("Visiting binary expression: %s\n", ret.c_str());
 			return ret;
 		}
 
-		std::string visitCallExpr(Call<std::string>* expr) {
+		std::string visitCallExpr(Call<std::string>* expr) override{
 			std::string ret = "( call function on " + expr->callee->accept(this) + "with args (";
 			for (Expr<std::string>* arg : expr->arguments)
 				ret += arg->accept(this) + ", ";
 			return ret.substr(0, ret.size() - 2) + ") )";
 		}
 
-		std::string visitGetExpr(Get<std::string>* expr) {
+		std::string visitGetExpr(Get<std::string>* expr) override{
 			throw 0;
 			//TODO
 			const std::string ret = "";
 			return ret;
 		}
 
-		std::string visitGroupingExpr(Grouping<std::string>* expr) {
+		std::string visitGroupingExpr(Grouping<std::string>* expr) override{
 			const std::string ret = "( group" + expr->expression->accept(this) + " )";
 			//printf("Visiting grouping expression: %s\n", ret.c_str());
 			return ret;
 		}
 
-		std::string visitLiteralExpr(Literal<std::string>* expr) {
+		std::string visitLiteralExpr(Literal<std::string>* expr) override{
 			const std::string ret = "( " + expr->value.toString() + " )";
 			//printf("Visiting literal expression: %s\n", ret.c_str());
 			return ret;
 		}
 
-		std::string visitLogicalExpr(Logical<std::string>* expr) {
+		std::string visitLogicalExpr(Logical<std::string>* expr) override{
 			const std::string ret = "( " + expr->left->accept(this) + " " + expr->op.lexeme + " " + expr->left->accept(this) + " )";
 			//printf("Visiting literal expression: %s\n", ret.c_str());
 			return ret;
 		}
 
-		std::string visitSetExpr(Set<std::string>* expr) {
+		std::string visitSetExpr(Set<std::string>* expr) override{
 			throw 0;
 			//TODO
 			const std::string ret = "";
 			return ret;
 		}
 
-		std::string visitSuperExpr(Super<std::string>* expr) {
+		std::string visitSuperExpr(Super<std::string>* expr) override{
 			throw 0;
 			//TODO
 			const std::string ret = "";
 			return ret;
 		}
 
-		std::string visitThisExpr(This<std::string>* expr) {
+		std::string visitThisExpr(This<std::string>* expr) override{
 			throw 0;
 			//TODO
 			const std::string ret = "";
 			return ret;
 		}
 
-		std::string visitUnaryExpr(Unary<std::string>* expr) {
+		std::string visitUnaryExpr(Unary<std::string>* expr) override{
 			const std::string ret = "( " + expr->op.lexeme + " " + expr->right->accept(this) + " )";
 			//printf("Visiting unary expression: %s\n", ret.c_str());
 			return ret;
 		}
 
-		std::string visitVariableExpr(Variable<std::string>* expr) {
+		std::string visitVariableExpr(Variable<std::string>* expr) override{
 			const std::string ret = "( var '" + expr->name.lexeme + "' )";
 			//printf("Visiting unary expression: %s\n", ret.c_str());
 			return ret;

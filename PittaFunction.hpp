@@ -78,7 +78,7 @@ namespace pitta {
 			return toReturn;
 		}
 
-		Callable* bind(Instance* instance) {
+		Callable* bind(Instance* instance) override{
 			std::shared_ptr<Environment> environment = std::make_shared<Environment>(closure);
 			environment->define(c_classSelfReferenceKey, instance);
 			

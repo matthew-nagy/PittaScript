@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include "PittaStatements.hpp"
+#include "PittaRuntime.hpp"
 
 #ifndef PITTA_MAX_FUNC_PARAMS
 #define PITTA_MAX_FUNC_PARAMS 255
@@ -142,6 +143,8 @@ namespace pitta {
 				case PRINT:
 				case RETURN:
 					return;
+				default:
+					break;
 				}
 
 				advance();

@@ -197,6 +197,8 @@ case OpType:\
 				runtime->error(expr->op, "Logical not operator may only be applied to integer values");
 				throw new PittaRuntimeException("Logical not operator may only be applied to integer values");
 			}
+		default:
+			runtime->error(expr->op, "Non-unary token being treated as a unary expression");
 		}
 
 		return Undefined;

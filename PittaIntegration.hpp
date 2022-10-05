@@ -108,7 +108,7 @@ namespace pitta {
 			return function(interpreter, arguments, boundInstance->getInnerInstance());
 		}
 
-		Callable* bind(Instance* instance) {
+		Callable* bind(Instance* instance) override {
 			IntegratedCallable<T>* boundCallable = new IntegratedCallable<T>(getArity(), getName(), function);
 			boundCallable->boundInstance = (IntegratedInstance<T>*)instance;
 			return boundCallable;

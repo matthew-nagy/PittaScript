@@ -104,57 +104,57 @@ namespace pitta {
 			}
 		}
 
-		Value visitAssignExpr(Assign<Value>* expr) {
+		Value visitAssignExpr(Assign<Value>* expr) override {
 			resolve(expr->value);
 			resolveLocal(expr, expr->name);
 			return Null;
 		}
 
-		Value visitBinaryExpr(Binary<Value>* expr) {
+		Value visitBinaryExpr(Binary<Value>* expr) override {
 			resolve(expr->left);
 			resolve(expr->right);
 			return Null;
 		}
 
-		Value visitCallExpr(Call<Value>* expr) {
+		Value visitCallExpr(Call<Value>* expr) override {
 			resolve(expr->callee);
 			for (auto& arg : expr->arguments)
 				resolve(arg);
 			return Null;
 		}
 
-		Value visitGetExpr(Get<Value>* expr) {
+		Value visitGetExpr(Get<Value>* expr) override {
 			resolve(expr->object);
 			return Null;
 		}
 
-		Value visitGroupingExpr(Grouping<Value>* expr) {
+		Value visitGroupingExpr(Grouping<Value>* expr) override {
 			resolve(expr->expression);
 			return Null;
 		}
 
-		Value visitLiteralExpr(Literal<Value>* expr){
+		Value visitLiteralExpr(Literal<Value>* expr)override {
 			return Null;
 		}
 
-		Value visitLogicalExpr(Logical<Value>* expr) {
+		Value visitLogicalExpr(Logical<Value>* expr) override {
 			resolve(expr->left);
 			resolve(expr->right);
 			return Null;
 		}
 
-		Value visitSetExpr(Set<Value>* expr) {
+		Value visitSetExpr(Set<Value>* expr) override {
 			resolve(expr->value);
 			resolve(expr->object);
 			return Null;
 		}
 
-		Value visitSuperExpr(Super<Value>* expr) {
+		Value visitSuperExpr(Super<Value>* expr) override {
 			resolveLocal(expr, expr->keyword);
 			return Null;
 		}
 
-		Value visitThisExpr(This<Value>* expr) {
+		Value visitThisExpr(This<Value>* expr) override {
 #ifdef _DEBUG
 			if (currentClass == ClassType::NONE)
 				interpreter->getRuntime()->error(expr->keyword, "'" + c_classSelfReferenceKey + "' keyword is ony allowed inside classes.");
@@ -163,12 +163,12 @@ namespace pitta {
 			return Null;
 		}
 
-		Value visitUnaryExpr(Unary<Value>* expr) {
+		Value visitUnaryExpr(Unary<Value>* expr) override {
 			resolve(expr->right);
 			return Null;
 		}
 
-		Value visitVariableExpr(Variable<Value>* expr) {
+		Value visitVariableExpr(Variable<Value>* expr) override {
 			if (!scopes.empty()) {
 				auto& currentScope = scopes.back();
 				if (currentScope.count(expr->name.lexeme) > 0) {
@@ -226,29 +226,29 @@ namespace pitta {
 			currentClass = enclosingClassType;
 		}
 
-		void visitExpressionStmt(Expression<void, Value>* stmt) {
+		void visitExpressionStmt(Expression<void, Value>* stmt) override {
 			resolve(stmt->expression);
 		}
 
-		void visitFunctionStmt(FunctionStmt<void, Value>* stmt) {
+		void visitFunctionStmt(FunctionStmt<void, Value>* stmt) override {
 			declare(stmt->name);
 			define(stmt->name);
 
 			resolveFunction(stmt, FunctionType::FUNCTION);
 		}
 
-		void visitIfStmt(If<void, Value>* stmt) {
+		void visitIfStmt(If<void, Value>* stmt) override {
 			resolve(stmt->condition);
 			resolve(stmt->thenBranch);
 			if (stmt->elseBranch != nullptr)
 				resolve(stmt->elseBranch);
 		}
 
-		void visitPrintStmt(Print<void, Value>* stmt) {
+		void visitPrintStmt(Print<void, Value>* stmt) override {
 			resolve(stmt->expression);
 		}
 
-		void visitReturnStmt(Return<void, Value>* stmt) {
+		void visitReturnStmt(Return<void, Value>* stmt) override {
 #ifdef _DEBUG
 			if (currentFunction == FunctionType::NONE) {
 				interpreter->getRuntime()->error(stmt->keyword, "Can't return from top level code");

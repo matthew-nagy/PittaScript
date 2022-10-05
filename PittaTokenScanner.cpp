@@ -97,12 +97,12 @@ namespace pitta {
 		}
 
 		Scanner::Scanner(const std::string& source, Runtime* runtime) :
-			source(source),
-			runtime(runtime)
+			runtime(runtime),
+			source(source)
 		{}
 		Scanner::Scanner(std::string&& source, Runtime* runtime) :
-			source(std::move(source)),
-			runtime(runtime)
+			runtime(runtime),
+			source(std::move(source))
 		{}
 
 

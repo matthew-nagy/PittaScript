@@ -25,12 +25,16 @@ namespace pitta {
         virtual T visitReturnStmt(Return<T, R>* stmt) = 0;
         virtual T visitVarStmt(Var<T, R>* stmt) = 0;
         virtual T visitWhileStmt(While<T, R>* stmt) = 0;
+
+        virtual ~StatementVisitor() = default;
 	};
 
     template<class T, class R>
     class Stmt {
     public:
         virtual T accept(StatementVisitor<T, R>* visitor) = 0;
+
+        virtual ~Stmt() = default;
     };
 
     template<class T, class R>
