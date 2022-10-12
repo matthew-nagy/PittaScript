@@ -20,3 +20,21 @@ matt.fullIntro();
 
 harold.fullIntro();
 harold.setFactoids("Geoff", 69);
+
+print "";
+print "";
+
+class NewIT < IT{
+	init(name, age, fact, colour){
+		super.init(name, age, fact);
+		this.faveCol = colour;
+	}
+
+	fullIntro(){
+		super.fullIntro();
+		print "Oh yeah, and my fave colour is " ++ this.faveCol ++ "!";
+	}
+}
+
+sarah = NewIT("Sarah", 26, "I am derrivative", "yellow, though no one likes it");
+sarah.fullIntro();

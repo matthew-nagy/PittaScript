@@ -20,7 +20,7 @@ namespace pitta {
 		Class(const std::string& name, Class const* superclass, std::unordered_map<std::string, Callable*>&& methods);
 		Class(const std::string& name, Class const* superclass, const std::unordered_map<std::string, Callable*>& methods);
 		virtual ~Class() = default;
-	private:
+	protected:
 		std::unordered_map<std::string, Callable*> methods;
 	};
 	

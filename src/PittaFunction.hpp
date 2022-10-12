@@ -31,8 +31,8 @@ namespace pitta {
 			name(name)
 		{}
 		virtual ~Callable() = default;
-	private:
-		const int arity;
+	protected:
+		int arity;
 		const std::string name;
 	};
 

@@ -58,13 +58,18 @@ namespace pitta {
 			return 3;
 		}
 
-		IntegratedClass(const std::string& name, const std::unordered_map<std::string, Callable*>& methods, NewInstanceGenerator<T> generator, FieldsFromInstance<T> fielder):
+		IntegratedClass(const std::string& name, const std::unordered_map<std::string, Callable*>& methods, int generatorArity, NewInstanceGenerator<T> generator, FieldsFromInstance<T> fielder):
 			Class(name, nullptr, methods),
 			generateNewInstance(generator),
 			getFieldsFromInstance(fielder)
 		{
 			for (auto& [_, method] : methods)
 				generatedCallables.emplace_back(method);
+			
+//			Callable* initCallable = new NativeCallable(generatorArity, generateNewInstance);
+			//arity = generatorArity;
+			//generatedCallables.emplace_back(initCallable);
+			//this->methods.emplace("init", initCallable);
 		}
 		~IntegratedClass() {
 			for (auto callable : generatedCallables)
@@ -225,5 +230,5 @@ namespace pitta {
 		}
 	};
 
-	IntegratedClass<IT>* ITClass = new IntegratedClass<IT>("IT", IT::getPittaFunctions(), IT::generatePittaInstance, IT::getPittaBinding);
+	IntegratedClass<IT>* ITClass = new IntegratedClass<IT>("IT", IT::getPittaFunctions(), 3, IT::generatePittaInstance, IT::getPittaBinding);
 }
