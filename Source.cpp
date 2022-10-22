@@ -1,8 +1,8 @@
-#include "PittaParser.hpp"
-#include "PittaRuntime.hpp"
-#include "PittaInterpreter.hpp"
-#include "PittaResolver.hpp"
-#include "PittaStl.hpp"
+#include "src/PittaParser.hpp"
+#include "src/PittaRuntime.hpp"
+#include "src/PittaInterpreter.hpp"
+#include "src/PittaResolver.hpp"
+#include "src/PittaStl.hpp"
 #include <fstream>
 #include <sstream>
 
@@ -12,7 +12,8 @@ int fib(int n) {
 }
 
 #include <iostream>
-#include "PittaIntegration.hpp"
+#define PITTA_INTEGRATION_TEST
+#include "src/PittaIntegration.hpp"
 
 int main() {
 

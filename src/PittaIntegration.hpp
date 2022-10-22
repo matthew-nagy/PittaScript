@@ -147,7 +147,7 @@ namespace pitta {
 	};
 
 
-
+#ifdef PITTA_INTEGRATION_TEST
 	class IT {
 	public:
 
@@ -231,4 +231,5 @@ namespace pitta {
 	};
 
 	IntegratedClass<IT>* ITClass = new IntegratedClass<IT>("IT", IT::getPittaFunctions(), 3, IT::generatePittaInstance, IT::getPittaBinding);
+#endif
 }
