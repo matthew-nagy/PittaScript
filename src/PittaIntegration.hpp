@@ -36,6 +36,7 @@ namespace pitta {
 	public:
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override {
 			T* newCppInstance = generateNewInstance(interpreter, arguments);
+			generatedCppInstances.emplace_back(newCppInstance);
 			auto fields = getFieldsFromInstance(newCppInstance);
 
 			IntegratedInstance<T>* newInstance = new IntegratedInstance<T>(this, newCppInstance, fields);
@@ -76,6 +77,8 @@ namespace pitta {
 				delete callable;
 			for (auto instance : generatedInstances)
 				delete instance;
+			for (auto instance : generatedCppInstances)
+				delete instance;
 		}
 
 
@@ -86,6 +89,8 @@ namespace pitta {
 		std::vector<Callable*> generatedCallables;
 		//Those made before the interpreter is created
 		std::vector<Instance*> generatedInstances;
+
+		mutable std::vector<T*> generatedCppInstances;
 	};
 
 	template<class T>
