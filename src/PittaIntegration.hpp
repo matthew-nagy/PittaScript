@@ -56,13 +56,14 @@ namespace pitta {
 		}
 
 		int getArity()const override {
-			return 3;
+			return generatorArity;
 		}
 
 		IntegratedClass(const std::string& name, const std::unordered_map<std::string, Callable*>& methods, int generatorArity, NewInstanceGenerator<T> generator, FieldsFromInstance<T> fielder):
 			Class(name, nullptr, methods),
 			generateNewInstance(generator),
-			getFieldsFromInstance(fielder)
+			getFieldsFromInstance(fielder),
+			generatorArity(generatorArity)
 		{
 			for (auto& [_, method] : methods)
 				generatedCallables.emplace_back(method);
@@ -83,6 +84,8 @@ namespace pitta {
 
 
 	private:
+		int generatorArity; 
+
 		NewInstanceGenerator<T> generateNewInstance;
 		FieldsFromInstance<T> getFieldsFromInstance;
 
