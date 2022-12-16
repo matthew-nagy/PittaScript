@@ -384,6 +384,10 @@ case OpType:\
 		return runtime;
 	}
 
+	Environment* Interpreter::getEnvironment() {
+		return environment.get();
+	}
+
 	void Interpreter::resolve(Expr<Value>* expression, int depth) {
 		locals.emplace(expression, depth);
 	}

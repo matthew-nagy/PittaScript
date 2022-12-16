@@ -1,0 +1,6 @@
+camera_start = vec2(40, 45);
+player_speed = 5.0;
+
+resource_path = "DoughEngine/Resources/";
+texture_path = resource_path ++ "generic_textures";
+tilemap_path = resource_path ++ "tilemap";

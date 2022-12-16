@@ -4,6 +4,7 @@
 #include "PittaValue.hpp"
 #include "PittaTokenScanner.hpp"
 #include <stdint.h>
+#include <unordered_set>
 
 namespace pitta {
 
@@ -28,6 +29,9 @@ namespace pitta {
 
 
 		Value getAt(int distance, const std::string& name);
+
+		std::unordered_set<std::string> getDefinedValueNames()const;
+		std::unordered_map<std::string, Value> getDefinedValues(const std::unordered_set<std::string>& without = {});
 
 
 		Environment();

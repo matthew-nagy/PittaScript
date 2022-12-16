@@ -54,7 +54,9 @@ namespace pitta {
 	std::string Instance::asString()const {
 		return "Instance of class " + classDefinition->getName();
 	}
-
+	Class const* const Instance::getDefinition()const {
+		return classDefinition;
+	}
 	Value Instance::get(const Token& name) {
 		return get(name.lexeme);
 	}

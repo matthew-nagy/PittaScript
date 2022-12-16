@@ -1,4 +1,5 @@
 #include "PittaEnvironment.hpp"
+#include "PittaHigherTypes.hpp"
 
 namespace pitta {
 
@@ -40,9 +41,31 @@ namespace pitta {
 		return get(token.lexeme);
 	}
 
+
+	std::unordered_set<std::string> Environment::getDefinedValueNames()const {
+		std::unordered_set<std::string> names;
+		names.reserve(values.size());
+		for (auto& [name, _] : values)
+			names.emplace(name);
+		return names;
+	}
+	std::unordered_map<std::string, Value> Environment::getDefinedValues(const std::unordered_set<std::string>& without) {
+		std::unordered_map<std::string, Value> definedValues;
+		values.reserve(values.size() - without.size());
+
+		for (auto& [name, value] : values)
+			if (without.count(name) == 0)
+				definedValues.emplace(name, value);
+		
+		return definedValues;
+	}
+
+
 	Environment::Environment() :
 		enclosing(nullptr)
-	{}
+	{
+		addTypeBindings(this);
+	}
 
 	Environment::Environment(const std::shared_ptr<Environment>& enclosing) :
 		enclosing(enclosing)

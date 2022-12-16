@@ -57,6 +57,7 @@ namespace pitta{
             environment->define("int", &toIntCallable);
             environment->define("float", &toFloatCallable);
             environment->define("string", &toStringCallable);
+            environment->define("str", &toStringCallable);
             environment->define("bool", &toBoolCallable);
 
             environment->define("input", &inputLineCallable);

@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <memory>
+#include "PittaHigherTypes.hpp"
 
 namespace pitta {
 
@@ -28,12 +29,35 @@ namespace pitta {
 		bool isTruthy()const;
 
 		int asInt()const;
+		operator int()const;
+
 		float asFloat()const;
+		operator float()const;
+
 		bool asBool()const;
+		operator bool()const;
+
 		std::string asString()const;
+		operator std::string()const;
+
 		const Callable* asCallable()const;
+		operator const Callable* ()const;
+
 		const Class* asClass()const;
+		operator const Class* ()const;
+
 		Instance* asInstance()const;
+		operator Instance* ()const;
+
+		//Shortcuts for when we just want the value
+		vec2 asVec2()const;
+		vec3 asVec3()const;
+		vec4 asVec4()const;
+		operator vec2()const;
+		operator vec3()const;
+		operator vec4()const;
+
+
 
 		void setInt(int value);
 		void setFloat(float value);
@@ -42,6 +66,9 @@ namespace pitta {
 		void setCallable(const Callable* callable);
 		void setClass(const Class* classDef);
 		void setInstance(Instance* instance);
+		/*void setVector(vec2 vec);
+		void setVector(vec3 vec);
+		void setVector(vec4 vec);*/
 		void setNull();
 		void setUndefined();
 

@@ -62,6 +62,7 @@ namespace pitta {
 		void executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv);
 
 		Runtime* getRuntime();
+		Environment* getEnvironment();
 
 		void registerNewInstance(Instance* newInstance);
 

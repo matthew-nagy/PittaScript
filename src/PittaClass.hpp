@@ -29,6 +29,8 @@ namespace pitta {
 
 		std::string asString()const;
 
+		Class const* const getDefinition()const;
+
 		Value get(const Token& name);
 		Value get(const std::string& name);
 

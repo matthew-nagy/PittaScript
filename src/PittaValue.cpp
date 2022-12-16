@@ -1,6 +1,7 @@
 #include "PittaValue.hpp"
 #include "PittaFunction.hpp"
 #include "PittaClass.hpp"
+#include "PittaIntegration.hpp"
 
 #define basic_numerics \
 switch (type) {\
@@ -136,11 +137,20 @@ namespace pitta {
 	int Value::asInt()const {
 		basic_numerics
 	}
+	Value::operator int()const {
+		return asInt();
+	}
 	float Value::asFloat()const {
 		basic_numerics
 	}
+	Value::operator float()const {
+		return asFloat();
+	}
 	bool Value::asBool()const {
 		basic_numerics
+	}
+	Value::operator bool()const {
+		return asBool();
 	}
 	std::string Value::asString()const {
 		if (type == String) {
@@ -150,6 +160,9 @@ namespace pitta {
 		}
 		throw new PittaRuntimeException("No string conversion acceptable");
 	}
+	Value::operator std::string()const {
+		return asString();
+	}
 	const Callable* Value::asCallable()const {
 		if (type == Function)
 			return rep.func;
@@ -157,14 +170,45 @@ namespace pitta {
 			return rep.classDef;
 		throw new PittaRuntimeException("No function conversion acceptable");
 	}
+	Value::operator const pitta::Callable* ()const {
+		return asCallable();
+	}
 
 	const Class* Value::asClass()const {
 		return rep.classDef;
+	}
+	Value::operator const pitta::Class* ()const {
+		return asClass();
 	}
 
 	Instance* Value::asInstance()const {
 		return rep.instance;
 	}
+	Value::operator pitta::Instance* ()const {
+		return asInstance();
+	}
+
+	vec2 Value::asVec2()const {
+		if ((void*)rep.instance->getDefinition() != (void*)vec2Binding) {
+			throw new PittaRuntimeException("Value is not an instance of vec2");
+		}
+		return *((IntegratedInstance<vec2>*)rep.instance)->getInnerInstance();
+	}
+	vec3 Value::asVec3()const {
+		if ((void*)rep.instance->getDefinition() != (void*)vec3Binding) {
+			throw new PittaRuntimeException("Value is not an instance of vec3");
+		}
+		return *((IntegratedInstance<vec3>*)rep.instance)->getInnerInstance();
+	}
+	vec4 Value::asVec4()const {
+		if ((void*)rep.instance->getDefinition() != (void*)vec4Binding) {
+			throw new PittaRuntimeException("Value is not an instance of vec4");
+		}
+		return *((IntegratedInstance<vec4>*)rep.instance)->getInnerInstance();
+	}
+	Value::operator pitta::vec2()const { return asVec2(); }
+	Value::operator pitta::vec3()const { return asVec3(); }
+	Value::operator pitta::vec4()const { return asVec4(); }
 
 	void Value::setInt(int value) {
 		if (isBoundValue()) {
