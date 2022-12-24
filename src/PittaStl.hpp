@@ -13,14 +13,7 @@ namespace pitta{
 
         Value inputLine(Interpreter*, const std::vector<Value>& values);
 
-<<<<<<< HEAD
-        void addGlobalVariables(std::shared_ptr<Environment>& environment);
-=======
-        void addGlobalVariables(shared_data<Environment>& environment){
-            environment->assign("Null", Null);
-            environment->assign("Undefined", Undefined);
-        }
->>>>>>> e79dc48610978f94e3bff458055f44eba0c12334
+        void addGlobalVariables(shared_data<Environment>& environment);
 
         const NativeCallable toIntCallable(1, toInt);
         const NativeCallable toFloatCallable(1, toFloat);
@@ -29,23 +22,6 @@ namespace pitta{
 
         const NativeCallable inputLineCallable(0, inputLine);
 
-<<<<<<< HEAD
-        std::shared_ptr<Environment> getEnvironment();
-=======
-        shared_data<Environment> getEnvironment(){
-            shared_data<Environment> environment = make_shared_data<Environment>();
-            addGlobalVariables(environment);
-
-            environment->define("int", &toIntCallable);
-            environment->define("float", &toFloatCallable);
-            environment->define("string", &toStringCallable);
-            environment->define("str", &toStringCallable);
-            environment->define("bool", &toBoolCallable);
-
-            environment->define("input", &inputLineCallable);
-
-            return environment;
-        }
->>>>>>> e79dc48610978f94e3bff458055f44eba0c12334
+        shared_data<Environment> getEnvironment();
     }
 }
