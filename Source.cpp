@@ -60,11 +60,11 @@ int main() {
 	pitta::shared_data<pitta::Environment> globals = pitta::stl::getEnvironment();
 	globals->define("IT", pitta::ITClass);
 	pitta::IT test("Harold", 21, "Not a hand murderer");
-	globals->define("harold", pitta::ITClass->bindExistingInstance(&test));
 
 	auto preRunningValues = globals->getDefinedValueNames();
 
 	pitta::Interpreter interpreter(&runtime, globals);
+	globals->define("harold", pitta::ITClass->bindExistingInstance(&test, &interpreter));
 	pitta::Resolver r(&interpreter);
 	std::chrono::steady_clock::time_point begin_resolve = std::chrono::steady_clock::now();
 	r.sweepStatements(tree.statements);
