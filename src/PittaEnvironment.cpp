@@ -41,6 +41,12 @@ namespace pitta {
 		return get(token.lexeme);
 	}
 
+	Environment& Environment::operator|=(const Environment& other) {
+		for (auto& pair : other.values)
+			values.emplace(pair);
+
+		return *this;
+	}
 
 	std::unordered_set<std::string> Environment::getDefinedValueNames()const {
 		std::unordered_set<std::string> names;

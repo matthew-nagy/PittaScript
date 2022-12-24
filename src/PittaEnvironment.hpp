@@ -27,6 +27,8 @@ namespace pitta {
 		Value get(const std::string& name);
 		Value get(const Token& token);
 
+		Environment& operator|=(const Environment& other);
+
 
 		Value getAt(int distance, const std::string& name);
 

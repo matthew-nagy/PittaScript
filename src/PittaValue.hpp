@@ -37,8 +37,8 @@ namespace pitta {
 		bool asBool()const;
 		operator bool()const;
 
-		std::string asString()const;
-		operator std::string()const;
+		const std::string& asString()const;
+		operator const std::string&()const;
 
 		const Callable* asCallable()const;
 		operator const Callable* ()const;

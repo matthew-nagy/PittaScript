@@ -152,7 +152,7 @@ namespace pitta {
 	Value::operator bool()const {
 		return asBool();
 	}
-	std::string Value::asString()const {
+	const std::string& Value::asString()const {
 		if (type == String) {
 			if (isBoundValue())
 				return *rep.stringValP;
@@ -160,7 +160,7 @@ namespace pitta {
 		}
 		throw new PittaRuntimeException("No string conversion acceptable");
 	}
-	Value::operator std::string()const {
+	Value::operator const std::string& ()const {
 		return asString();
 	}
 	const Callable* Value::asCallable()const {
