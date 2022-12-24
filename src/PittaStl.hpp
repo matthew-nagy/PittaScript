@@ -38,7 +38,7 @@ namespace pitta{
             return line;
         }
 
-        void addGlobalVariables(std::shared_ptr<Environment>& environment){
+        void addGlobalVariables(shared_data<Environment>& environment){
             environment->assign("Null", Null);
             environment->assign("Undefined", Undefined);
         }
@@ -50,8 +50,8 @@ namespace pitta{
 
         const NativeCallable inputLineCallable(0, inputLine);
 
-        std::shared_ptr<Environment> getEnvironment(){
-            std::shared_ptr<Environment> environment = std::make_shared<Environment>();
+        shared_data<Environment> getEnvironment(){
+            shared_data<Environment> environment = make_shared_data<Environment>();
             addGlobalVariables(environment);
 
             environment->define("int", &toIntCallable);

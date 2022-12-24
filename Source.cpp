@@ -15,9 +15,10 @@ int fib(int n) {
 #include <iostream>
 #define PITTA_INTEGRATION_TEST
 #include "src/PittaIntegration.hpp"
+#include "src/SharedData.hpp"
+
 
 int main() {
-
 	std::stringstream buffer;
 
 	std::string programs[] = { "ProgramFib.txt", "ProgramCollision.txt", "ProgramIntegrate.txt", "ProgramPlayground.txt", "example_config"};
@@ -56,7 +57,7 @@ int main() {
 	std::chrono::steady_clock::time_point end_compile = std::chrono::steady_clock::now();
 	std::cout << "Compile time = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_compile - begin_compile).count() << "[ms]" << std::endl;
 
-	std::shared_ptr<pitta::Environment> globals = pitta::stl::getEnvironment();
+	pitta::shared_data<pitta::Environment> globals = pitta::stl::getEnvironment();
 	globals->define("IT", pitta::ITClass);
 	pitta::IT test("Harold", 21, "Not a hand murderer");
 	globals->define("harold", pitta::ITClass->bindExistingInstance(&test));
@@ -75,12 +76,6 @@ int main() {
 		interpreter.interpret(tree.statements);
 		std::chrono::steady_clock::time_point end_run = std::chrono::steady_clock::now();
 		std::cout << "Run time = " << std::chrono::duration_cast<std::chrono::milliseconds>(end_run - begin_run).count() << "[ms]" << std::endl;
-		auto& env = *interpreter.getEnvironment();
-		auto definedValues = env.getDefinedValues(preRunningValues);
-		for (auto& [name, value] : definedValues)
-			printf("%s\t%s\n", name.c_str(), value.toString().c_str());
-		pitta::vec2 camersStart = definedValues["camera_start"];
-		printf("\nCamera starts at %f, %f\n", camersStart.x, camersStart.y);
 	}
 	else {
 		printf("There was an error, cannot run!\n");

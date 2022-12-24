@@ -220,7 +220,7 @@ case OpType:\
 
 
 	void Interpreter::visitBlockStmt(Block<void, Value>* stmt) {
-		executeBlock(stmt->statements, std::make_shared<Environment>(environment));
+		executeBlock(stmt->statements, make_shared_data<Environment>(environment));
 	}
 
 	void Interpreter::visitClassStmt(ClassStmt<void, Value>* stmt) {
@@ -235,8 +235,8 @@ case OpType:\
 
 		environment->define(stmt->name, Null);
 		//Have to do some tomfoolery to prevent a "super" environment from going out of scope
-		std::shared_ptr<Environment> superEnvironment = std::make_shared<Environment>(environment);
-		std::shared_ptr<Environment>* workingEnvironment = &environment;
+		shared_data<Environment> superEnvironment = make_shared_data<Environment>(environment);
+		shared_data<Environment>* workingEnvironment = &environment;
 
 		if (stmt->superclass != nullptr) {
 			workingEnvironment = &superEnvironment;
@@ -308,7 +308,7 @@ case OpType:\
 
 	class SetBack {
 	public:
-		SetBack(std::shared_ptr<Environment>& toSet, const std::shared_ptr<Environment>& value):
+		SetBack(shared_data<Environment>& toSet, const shared_data<Environment>& value):
 			toSet(toSet),
 			value(value)
 		{}
@@ -317,12 +317,12 @@ case OpType:\
 			toSet = value;
 		}
 	private:
-		std::shared_ptr<Environment>& toSet;
-		std::shared_ptr<Environment> value;
+		shared_data<Environment>& toSet;
+		shared_data<Environment> value;
 	};
 
-	void Interpreter::executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv) {
-		std::shared_ptr<Environment> previous = environment;
+	void Interpreter::executeBlock(const std::vector<Stmt<void, Value>*>& statements, const shared_data<Environment>& newEnv) {
+		shared_data<Environment> previous = environment;
 		environment = newEnv;
 		SetBack raiiTrySafe(environment, previous);
 
@@ -357,13 +357,13 @@ case OpType:\
 
 	Interpreter::Interpreter(Runtime* runtime):
 		runtime(runtime),
-		globals(std::make_shared<Environment>())
+		globals(make_shared_data<Environment>())
 	{
 		environment = globals;
 	}
 
 
-	Interpreter::Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals):
+	Interpreter::Interpreter(Runtime* runtime, const shared_data<Environment>& globals):
 		runtime(runtime),
 		globals(globals)
 	{
