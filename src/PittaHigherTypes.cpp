@@ -121,7 +121,7 @@ namespace pitta {
 
 
 
-	void addTypeBindings(std::shared_ptr<pitta::Environment>& environment) {
+	void addTypeBindings(shared_data<pitta::Environment>& environment) {
 		addTypeBindings(environment.get());
 	}
 	void addTypeBindings(pitta::Environment* environment) {

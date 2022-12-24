@@ -68,12 +68,12 @@ namespace pitta {
 
 
 	Environment::Environment() :
-		enclosing(nullptr)
+		enclosing()
 	{
 		addTypeBindings(this);
 	}
 
-	Environment::Environment(const std::shared_ptr<Environment>& enclosing) :
+	Environment::Environment(const shared_data<Environment>& enclosing) :
 		enclosing(enclosing)
 	{}
 

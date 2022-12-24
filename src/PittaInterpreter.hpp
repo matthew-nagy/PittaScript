@@ -59,7 +59,7 @@ namespace pitta {
 		void interpret(Expr<Value>* expression);
 		void interpret(const std::vector<Stmt<void, Value>*>& statements);
 
-		void executeBlock(const std::vector<Stmt<void, Value>*>& statements, const std::shared_ptr<Environment>& newEnv);
+		void executeBlock(const std::vector<Stmt<void, Value>*>& statements, const shared_data<Environment>& newEnv);
 
 		Runtime* getRuntime();
 		Environment* getEnvironment();
@@ -67,7 +67,7 @@ namespace pitta {
 		void registerNewInstance(Instance* newInstance);
 
 		Interpreter(Runtime* runtime);
-		Interpreter(Runtime* runtime, const std::shared_ptr<Environment>& globals);
+		Interpreter(Runtime* runtime, const shared_data<Environment>& globals);
 		~Interpreter();
 	private:
 		Runtime* runtime;
@@ -77,8 +77,8 @@ namespace pitta {
 		std::vector<Class*> generatedClasses;
 		std::vector<Instance*> generatedInstances;
 
-		std::shared_ptr<Environment> globals;
-		std::shared_ptr<Environment> environment;
+		shared_data<Environment> globals;
+		shared_data<Environment> environment;
 		std::unordered_map<Expr<Value>*, int> locals;
 
 		Value evaluate(Expr<Value>* expression);

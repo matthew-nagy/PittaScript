@@ -59,10 +59,10 @@ namespace pitta {
 	class ScriptCallable : public Callable {
 	public:
 		FunctionStmt<void, Value>* declaration;
-		std::shared_ptr<Environment> closure;
+		shared_data<Environment> closure;
 
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override {
-			std::shared_ptr<Environment> environment = std::make_shared<Environment>(closure);
+			shared_data<Environment> environment = make_shared_data<Environment>(closure);
 			for (size_t i = 0; i < arguments.size(); i++)
 				environment->define(declaration->params[i], arguments[i]);
 
@@ -79,13 +79,13 @@ namespace pitta {
 		}
 
 		Callable* bind(Instance* instance) override{
-			std::shared_ptr<Environment> environment = std::make_shared<Environment>(closure);
+			shared_data<Environment> environment = make_shared_data<Environment>(closure);
 			environment->define(c_classSelfReferenceKey, instance);
 			
 			return new ScriptCallable(declaration, environment);
 		}
 
-		ScriptCallable(FunctionStmt<void, Value>* declaration, std::shared_ptr<Environment> closure):
+		ScriptCallable(FunctionStmt<void, Value>* declaration, shared_data<Environment> closure):
 			Callable(declaration->params.size(), declaration->name.lexeme),
 			declaration(declaration),
 			closure(closure)

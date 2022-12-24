@@ -35,9 +35,8 @@ namespace pitta {
 	class IntegratedClass : public Class {
 	public:
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override {
-			T* newCppInstance = generateNewInstance(interpreter, arguments);
-			generatedCppInstances.emplace_back(newCppInstance);
-			auto fields = getFieldsFromInstance(newCppInstance);
+			shared_data<T> newCppInstance(generateNewInstance(interpreter, arguments));
+			auto fields = getFieldsFromInstance(newCppInstance.get());
 
 			IntegratedInstance<T>* newInstance = new IntegratedInstance<T>(this, newCppInstance, fields);
 
@@ -46,11 +45,22 @@ namespace pitta {
 			return newInstance;
 		}
 
-		Value bindExistingInstance(T* instance) {
-			auto fields = getFieldsFromInstance(instance);
-			IntegratedInstance<T>* newInstance = new IntegratedInstance<T>(this, instance, fields);
+		Value createPittaInstance(T* forPittaToOwn, Interpreter* interpreter) {
+			shared_data<T> instanceWrapper(forPittaToOwn, shared_data<T>::usage_flag::Internal_Usage);
+			auto fields = getFieldsFromInstance(forPittaToOwn);
+			IntegratedInstance<T>* newInstance = new IntegratedInstance<T>(this, instanceWrapper, fields);
 
-			generatedInstances.emplace_back(newInstance);
+			interpreter->registerNewInstance(newInstance);
+
+			return newInstance;
+		}
+
+		Value bindExistingInstance(T* instance, Interpreter* interpreter) {
+			shared_data<T> instanceWrapper(instance, shared_data<T>::usage_flag::External_Usage);
+			auto fields = getFieldsFromInstance(instance);
+			IntegratedInstance<T>* newInstance = new IntegratedInstance<T>(this, instanceWrapper, fields);
+
+			interpreter->registerNewInstance(newInstance);
 
 			return newInstance;
 		}
@@ -76,10 +86,6 @@ namespace pitta {
 		~IntegratedClass() {
 			for (auto callable : generatedCallables)
 				delete callable;
-			for (auto instance : generatedInstances)
-				delete instance;
-			for (auto instance : generatedCppInstances)
-				delete instance;
 		}
 
 
@@ -90,27 +96,23 @@ namespace pitta {
 		FieldsFromInstance<T> getFieldsFromInstance;
 
 		std::vector<Callable*> generatedCallables;
-		//Those made before the interpreter is created
-		std::vector<Instance*> generatedInstances;
-
-		mutable std::vector<T*> generatedCppInstances;
 	};
 
 	template<class T>
 	class IntegratedInstance : public Instance {
 	public:
-		T* getInnerInstance()const {
+		shared_data<T> getInnerInstance()const {
 			return instance;
 		}
 
-		IntegratedInstance(IntegratedClass<T> const* definition, T* instance, std::unordered_map<std::string, Value>& fields):
+		IntegratedInstance(IntegratedClass<T> const* definition, const shared_data<T> instance, std::unordered_map<std::string, Value>& fields):
 			Instance(definition),
 			instance(instance)
 		{
 			this->fields = fields;
 		}
 	private:
-		T* instance;
+		shared_data<T> instance;
 	};
 
 	template<class T>
@@ -134,7 +136,7 @@ namespace pitta {
 		};
 
 		Value operator()(Interpreter* interpreter, const std::vector<Value>& arguments)const override {
-			return function(interpreter, arguments, boundInstance->getInnerInstance());
+			return function(interpreter, arguments, boundInstance->getInnerInstance().get());
 		}
 
 		Callable* bind(Instance* instance) override {

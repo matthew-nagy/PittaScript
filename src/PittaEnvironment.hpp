@@ -1,6 +1,5 @@
 #pragma once
 #include <unordered_map>
-#include <memory>
 #include "PittaValue.hpp"
 #include "PittaTokenScanner.hpp"
 #include <stdint.h>
@@ -11,7 +10,7 @@ namespace pitta {
 	class Environment{
 	public:
 
-		std::shared_ptr<Environment> enclosing;
+		shared_data<Environment> enclosing;
 
 		void define(const Token& name, const Value& value);
 
@@ -38,7 +37,7 @@ namespace pitta {
 
 		Environment();
 		
-		Environment(const std::shared_ptr<Environment>& enclosing);
+		Environment(const shared_data<Environment>& enclosing);
 
 	private:
 
