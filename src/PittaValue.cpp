@@ -192,19 +192,19 @@ namespace pitta {
 		if ((void*)rep.instance->getDefinition() != (void*)vec2Binding) {
 			throw new PittaRuntimeException("Value is not an instance of vec2");
 		}
-		return *((IntegratedInstance<vec2>*)rep.instance)->getInnerInstance();
+		return *vec2Binding->unpack(*this);
 	}
 	vec3 Value::asVec3()const {
 		if ((void*)rep.instance->getDefinition() != (void*)vec3Binding) {
 			throw new PittaRuntimeException("Value is not an instance of vec3");
 		}
-		return *((IntegratedInstance<vec3>*)rep.instance)->getInnerInstance();
+		return *vec3Binding->unpack(*this);
 	}
 	vec4 Value::asVec4()const {
 		if ((void*)rep.instance->getDefinition() != (void*)vec4Binding) {
 			throw new PittaRuntimeException("Value is not an instance of vec4");
 		}
-		return *((IntegratedInstance<vec4>*)rep.instance)->getInnerInstance();
+		return *vec4Binding->unpack(*this);
 	}
 	Value::operator pitta::vec2()const { return asVec2(); }
 	Value::operator pitta::vec3()const { return asVec3(); }

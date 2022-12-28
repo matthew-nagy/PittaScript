@@ -59,7 +59,6 @@ namespace pitta {
 		operator vec4()const;
 
 
-
 		void setInt(int value);
 		void setFloat(float value);
 		void setBool(bool value);

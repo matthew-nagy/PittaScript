@@ -69,6 +69,10 @@ namespace pitta {
 			return generatorArity;
 		}
 
+		static T* unpack(const pitta::Value& value) {
+			return ((IntegratedInstance<T>*)value.asInstance())->getInnerInstance().get();
+		}
+
 		IntegratedClass(const std::string& name, const std::unordered_map<std::string, Callable*>& methods, int generatorArity, NewInstanceGenerator<T> generator, FieldsFromInstance<T> fielder):
 			Class(name, nullptr, methods),
 			generateNewInstance(generator),
